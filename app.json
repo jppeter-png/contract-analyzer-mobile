@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Contract Analyzer",
+    "slug": "contract-analyzer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.yourcompany.contractanalyzer",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Used to select contract documents from your library.",
+        "NSLocalNetworkUsageDescription": "Used to connect to the local development server while developing.",
+        "NSBonjourServices": [
+          "_dev._tcp",
+          "_http._tcp"
+        ]
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.yourcompany.contractanalyzer"
+    },
+    "plugins": [
+      "expo-document-picker"
+    ]
+  }
+}
