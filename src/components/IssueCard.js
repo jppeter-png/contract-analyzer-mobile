@@ -8,7 +8,8 @@ if (Platform.OS === 'android') {
 
 export default function IssueCard({ issue }) {
   const [open, setOpen] = useState(false);
-  const { severity, category, title, description, recommendation } = issue;
+  const { severity, category, title, description, recommendation, type } = issue;
+  const isMissingProtection = type === 'missing_protection';
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -20,7 +21,13 @@ export default function IssueCard({ issue }) {
   return (
     <View style={styles.card}>
       <TouchableOpacity onPress={toggle} style={styles.row} activeOpacity={0.7}>
-        <RiskBadge risk={severity} />
+        {isMissingProtection ? (
+          <View style={styles.missingBadge}>
+            <Text style={styles.missingBadgeText}>Missing protection</Text>
+          </View>
+        ) : (
+          <RiskBadge risk={severity} />
+        )}
         <Text style={styles.title} numberOfLines={open ? undefined : 1}>{title}</Text>
         <Text style={styles.chevron}>{open ? '▲' : '▼'}</Text>
       </TouchableOpacity>
@@ -49,6 +56,11 @@ const styles = StyleSheet.create({
     padding: 14,
   },
   title: { flex: 1, fontSize: 14, fontWeight: '600', color: '#111' },
+  missingBadge: {
+    borderRadius: 999, borderWidth: 1, borderColor: '#e5e7eb',
+    backgroundColor: '#f3f4f6', paddingVertical: 4, paddingHorizontal: 12,
+  },
+  missingBadgeText: { fontSize: 12, fontWeight: '600', color: '#6b7280' },
   chevron: { fontSize: 10, color: '#aaa' },
   body: { paddingHorizontal: 14, paddingBottom: 14, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
   category: { fontSize: 11, color: '#aaa', textTransform: 'uppercase', letterSpacing: 0.7, marginTop: 12, marginBottom: 4 },

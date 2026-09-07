@@ -8,9 +8,15 @@ export default function ResultsScreen({ navigation, route }) {
   const { analysis, findings = [], totalRedacted = 0 } = route.params;
   const { overall_risk, summary, issues = [], missing_protections = [], truncated = false } = analysis;
 
-  const high = issues.filter(i => i.severity === 'high');
-  const medium = issues.filter(i => i.severity === 'medium');
-  const low = issues.filter(i => i.severity === 'low');
+  // "missing_protection" issues note something absent, not an unfair clause
+  // that's actually present — keep them out of the severity stats/counts so
+  // a contract that's simply short on boilerplate doesn't read as risky.
+  const clauseIssues = issues.filter(i => i.type !== 'missing_protection');
+  const missingIssues = issues.filter(i => i.type === 'missing_protection');
+
+  const high = clauseIssues.filter(i => i.severity === 'high');
+  const medium = clauseIssues.filter(i => i.severity === 'medium');
+  const low = clauseIssues.filter(i => i.severity === 'low');
   const sorted = [...high, ...medium, ...low];
 
   return (
@@ -72,11 +78,15 @@ export default function ResultsScreen({ navigation, route }) {
           </View>
         )}
 
-        {missing_protections.length > 0 && (
+        {(missingIssues.length > 0 || missing_protections.length > 0) && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>🛑 Missing protections</Text>
+            <Text style={styles.missingSectionNote}>
+              Standard protections this contract doesn't mention — not necessarily unfair, just absent.
+            </Text>
+            {missingIssues.map((issue, i) => <IssueCard key={`mi-${i}`} issue={issue} />)}
             {missing_protections.map((p, i) => (
-              <View key={i} style={styles.missingItem}>
+              <View key={`mp-${i}`} style={styles.missingItem}>
                 <Text style={styles.missingDot}>○</Text>
                 <Text style={styles.missingText}>{p}</Text>
               </View>
@@ -112,6 +122,7 @@ const styles = StyleSheet.create({
   statLabel: { fontSize: 12, color: '#888' },
   section: { marginBottom: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 12 },
+  missingSectionNote: { fontSize: 12.5, color: '#888', marginTop: -6, marginBottom: 12, lineHeight: 18 },
   redactedBox: { backgroundColor: '#f0fdf4', borderRadius: 10, padding: 14, borderWidth: 1, borderColor: '#bbf7d0' },
   redactedSummary: { fontSize: 13, color: '#166534', fontWeight: '600', marginBottom: 12 },
   redactedGroup: { marginBottom: 10 },
