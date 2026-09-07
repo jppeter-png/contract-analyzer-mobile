@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+ios/build/
+ios/Pods/
+android/build/
+android/app/build/
+android/.gradle/
+
+# OS
+.DS_Store
+
+# Env
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.*
