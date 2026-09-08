@@ -4,6 +4,8 @@ Expo / React Native app for uploading, pasting, or photographing a contract and 
 
 The backend lives in a separate repo: [contract-analyzer-backend](https://github.com/jppeter-png/contract-analyzer-backend).
 
+![Demo: paste a contract, review redacted PII, get an AI risk analysis, saved to history](demo/demo.gif)
+
 ---
 
 ## Setup
