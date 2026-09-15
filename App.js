@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import mobileAds from 'react-native-google-mobile-ads';
 
 import UploadScreen from './src/screens/UploadScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
@@ -16,6 +17,10 @@ import HistoryScreen from './src/screens/HistoryScreen';
 const Stack = createStackNavigator();
 
 export default function App() {
+  useEffect(() => {
+    mobileAds().initialize();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

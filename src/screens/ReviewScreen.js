@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView,
   StyleSheet, Alert, ActivityIndicator,
@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
 import { saveAnalysis } from '../history';
 import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
+import { preloadInterstitial, showInterstitial } from '../ads';
 
 const CONTRACT_TYPES = [
   { key: 'auto',       label: '🔍 Auto-detect',           desc: "Let AI figure it out" },
@@ -26,11 +27,21 @@ export default function ReviewScreen({ navigation, route }) {
   const [selectedType, setSelectedType] = useState('auto');
   const [expandedIndex, setExpandedIndex] = useState(null);
 
+  useEffect(() => {
+    preloadInterstitial(); // so it's likely ready by the time the user taps Analyze
+  }, []);
+
   const runNormalAnalysis = async () => {
     setLoading(true);
     navigation.navigate('Analyzing');
     try {
-      const analysis = await analyzeContract(scrubbedText, selectedType);
+      // Runs the ad alongside the real analysis call, not before it — masks
+      // the wait instead of adding to it. If the ad isn't loaded in time,
+      // showInterstitial() resolves immediately rather than blocking.
+      const [analysis] = await Promise.all([
+        analyzeContract(scrubbedText, selectedType),
+        showInterstitial(),
+      ]);
       saveAnalysis({ fileName, analysis, findings, totalRedacted });
       navigation.replace('Results', { analysis, findings, totalRedacted, fileName });
     } catch (err) {

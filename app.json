@@ -19,16 +19,23 @@
           "_dev._tcp",
           "_http._tcp"
         ]
+      },
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-4330297206877846~5194329303"
       }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.contractanalyzer"
+      "package": "com.yourcompany.contractanalyzer",
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-4330297206877846~5194329303"
+      }
     },
     "plugins": [
-      "expo-document-picker"
+      "expo-document-picker",
+      "react-native-google-mobile-ads"
     ]
   }
 }
