@@ -4,10 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
 import { mergeAnalyses, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import { saveAnalysis } from '../history';
+import { showInterstitial } from '../ads';
 
 export default function ChunkedAnalyzingScreen({ navigation, route }) {
   const { chunks, contractType, fileName, findings, totalRedacted } = route.params;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [sectionProgress, setSectionProgress] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(null);
   const cancelledRef = useRef(false);
 
@@ -20,10 +22,25 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
       for (let i = 0; i < chunks.length; i++) {
         if (cancelledRef.current) return;
         setCurrentIndex(i);
+        setSectionProgress(0);
+
+        // No real progress signal per section, so this eases toward 90% and
+        // never quite gets there on its own — the actual response snaps it
+        // to 100% instead of it stalling visibly at a cap.
+        const sectionTimer = setInterval(() => {
+          setSectionProgress((p) => p + (0.9 - p) * 0.08);
+        }, 300);
 
         try {
-          const analysis = await analyzeContract(chunks[i], contractType, { index: i + 1, total: chunks.length });
+          // Only shown once, alongside the first section — masks that wait
+          // rather than adding one, and firing it once per chunk would just
+          // be annoying (and risk AdMob flagging it as excessive ad load).
+          const [analysis] = await Promise.all([
+            analyzeContract(chunks[i], contractType, { index: i + 1, total: chunks.length }),
+            i === 0 ? showInterstitial() : Promise.resolve(),
+          ]);
           results.push(analysis);
+          setSectionProgress(1);
         } catch (err) {
           if (cancelledRef.current) return;
           Alert.alert(
@@ -32,6 +49,8 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
           );
           navigation.goBack();
           return;
+        } finally {
+          clearInterval(sectionTimer);
         }
 
         const isLast = i === chunks.length - 1;
@@ -85,6 +104,7 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
   const waiting = secondsLeft != null && secondsLeft > 0;
   const remainingChunks = chunks.length - currentIndex - 1;
   const etaMinutes = Math.ceil((remainingChunks * CHUNK_INTERVAL_MS) / 60000);
+  const overallProgress = (currentIndex + sectionProgress) / chunks.length;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -101,6 +121,10 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
             : 'Almost done'}
         </Text>
 
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${Math.round(overallProgress * 100)}%` }]} />
+        </View>
+
         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
           <Text style={styles.cancelBtnText}>Cancel</Text>
         </TouchableOpacity>
@@ -114,7 +138,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   spinner: { marginBottom: 24 },
   step: { fontSize: 18, fontWeight: '600', color: '#111', textAlign: 'center', marginBottom: 8 },
-  note: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 32 },
+  note: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 20 },
+  progressTrack: {
+    width: '100%', maxWidth: 280, height: 6, borderRadius: 3,
+    backgroundColor: '#eee', overflow: 'hidden', marginBottom: 28,
+  },
+  progressFill: { height: '100%', borderRadius: 3, backgroundColor: '#111' },
   cancelBtn: { paddingVertical: 10, paddingHorizontal: 20 },
   cancelBtnText: { fontSize: 15, color: '#dc2626', fontWeight: '500' },
 });
