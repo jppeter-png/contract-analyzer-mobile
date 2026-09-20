@@ -20,6 +20,11 @@ android/.gradle/
 .env
 .env.local
 
+# Apple / EAS credentials — never commit these
+*.p8
+*.p12
+*.mobileprovision
+
 # Logs
 *.log
 npm-debug.*
