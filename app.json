@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Contract Analyzer",
+    "name": "Document Risk Analyzer",
     "slug": "contract-analyzer",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,14 +11,15 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.yourcompany.contractanalyzer",
+      "bundleIdentifier": "com.josefpeter.contractanalyzer",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Used to select contract documents from your library.",
+        "NSPhotoLibraryUsageDescription": "Used to select documents from your library.",
         "NSLocalNetworkUsageDescription": "Used to connect to the local development server while developing.",
         "NSBonjourServices": [
           "_dev._tcp",
           "_http._tcp"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       },
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-4330297206877846~5194329303"
@@ -28,7 +29,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.contractanalyzer",
+      "package": "com.josefpeter.contractanalyzer",
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-4330297206877846~5194329303"
       }
@@ -36,6 +37,12 @@
     "plugins": [
       "expo-document-picker",
       "react-native-google-mobile-ads"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "78a1bf22-51c0-478b-9225-8fcd83313b58"
+      }
+    },
+    "owner": "josefpeter"
   }
 }
