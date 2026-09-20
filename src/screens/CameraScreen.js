@@ -78,7 +78,7 @@ export default function CameraScreen({ navigation }) {
     if (!permission?.granted) {
       const { granted } = await requestPermission();
       if (!granted) {
-        Alert.alert('Camera access needed', 'Please allow camera access in Settings to take photos of contracts.');
+        Alert.alert('Camera access needed', 'Please allow camera access in Settings to take photos of documents.');
         return;
       }
     }
@@ -137,7 +137,7 @@ export default function CameraScreen({ navigation }) {
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Photograph contract</Text>
+        <Text style={styles.title}>Photograph document</Text>
         <Text style={styles.subtitle}>
           Take photos of each page or pick from your camera roll. We'll extract the text automatically.
         </Text>
@@ -187,7 +187,7 @@ export default function CameraScreen({ navigation }) {
         {/* Tips */}
         <View style={styles.tips}>
           <Text style={styles.tipsTitle}>📌 Tips for best results</Text>
-          <Text style={styles.tip}>• Lay the contract flat on a solid surface</Text>
+          <Text style={styles.tip}>• Lay the document flat on a solid surface</Text>
           <Text style={styles.tip}>• Make sure all text is in frame and in focus</Text>
           <Text style={styles.tip}>• Good lighting improves accuracy</Text>
           <Text style={styles.tip}>• Add pages in order — they'll be combined automatically</Text>

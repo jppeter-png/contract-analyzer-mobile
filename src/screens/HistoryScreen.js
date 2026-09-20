@@ -79,7 +79,7 @@ export default function HistoryScreen({ navigation }) {
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>🕓</Text>
             <Text style={styles.emptyTitle}>No past analyses yet</Text>
-            <Text style={styles.emptySub}>Contracts you analyze will show up here.</Text>
+            <Text style={styles.emptySub}>Documents you analyze will show up here.</Text>
           </View>
         )}
 

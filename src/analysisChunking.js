@@ -65,7 +65,7 @@ export function mergeAnalyses(analyses) {
   const category = analyses.find(a => a.category && a.category !== 'auto')?.category
     || analyses[0].category;
 
-  const summary = `This contract was long and analyzed in ${analyses.length} sections. `
+  const summary = `This document was long and analyzed in ${analyses.length} sections. `
     + analyses.map((a, i) => `Section ${i + 1}: ${a.summary}`).join(' ');
 
   const issues = analyses.flatMap((a, i) =>
