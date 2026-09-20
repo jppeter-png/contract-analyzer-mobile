@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, ActivityIndicator,
+  View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { analyzeContract } from '../api';
-import { saveAnalysis } from '../history';
 import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
-import { preloadInterstitial, showInterstitial } from '../ads';
+import { preloadInterstitial } from '../ads';
 
 const CONTRACT_TYPES = [
   { key: 'auto',       label: '🔍 Auto-detect',           desc: "Let AI figure it out" },
   { key: 'employment', label: '💼 Employment',             desc: "Job offers, work agreements" },
   { key: 'nda',        label: '🤫 NDA / Confidentiality',  desc: "Non-disclosure agreements" },
-  { key: 'lease',      label: '🏠 Lease / Real estate',    desc: "Rental and property contracts" },
+  { key: 'lease',      label: '🏠 Lease / Real estate',    desc: "Rental and property documents" },
   { key: 'service',    label: '🤝 Service agreement',      desc: "Freelance, vendor, consulting" },
   { key: 'loan',       label: '💰 Loan / Finance',         desc: "Loans, credit, financing" },
   { key: 'tos',        label: '📱 Terms of service',       desc: "ToS, privacy policies" },
@@ -23,7 +20,6 @@ export default function ReviewScreen({ navigation, route }) {
   const { scrubResult, fileName } = route.params;
   const { scrubbedText, findings = [], wordCount, totalRedacted, preview } = scrubResult;
 
-  const [loading, setLoading] = useState(false);
   const [selectedType, setSelectedType] = useState('auto');
   const [expandedIndex, setExpandedIndex] = useState(null);
 
@@ -31,25 +27,10 @@ export default function ReviewScreen({ navigation, route }) {
     preloadInterstitial(); // so it's likely ready by the time the user taps Analyze
   }, []);
 
-  const runNormalAnalysis = async () => {
-    setLoading(true);
-    navigation.navigate('Analyzing');
-    try {
-      // Runs the ad alongside the real analysis call, not before it — masks
-      // the wait instead of adding to it. If the ad isn't loaded in time,
-      // showInterstitial() resolves immediately rather than blocking.
-      const [analysis] = await Promise.all([
-        analyzeContract(scrubbedText, selectedType),
-        showInterstitial(),
-      ]);
-      saveAnalysis({ fileName, analysis, findings, totalRedacted });
-      navigation.replace('Results', { analysis, findings, totalRedacted, fileName });
-    } catch (err) {
-      navigation.goBack();
-      Alert.alert('Analysis failed', err.response?.data?.error || err.message || 'Please try again');
-    } finally {
-      setLoading(false);
-    }
+  const runNormalAnalysis = () => {
+    navigation.navigate('Analyzing', {
+      scrubbedText, contractType: selectedType, fileName, findings, totalRedacted,
+    });
   };
 
   const runChunkedAnalysis = () => {
@@ -65,7 +46,7 @@ export default function ReviewScreen({ navigation, route }) {
 
     const minutes = estimateMinutes(Math.ceil(scrubbedText.length / MAX_CHARS_PER_ANALYSIS));
     Alert.alert(
-      'This contract is long',
+      'This document is long',
       `It's ${scrubbedText.length.toLocaleString()} characters — longer than the ${MAX_CHARS_PER_ANALYSIS.toLocaleString()}-character limit analyzed in a single pass. Later sections would be skipped unless you choose to process it in full.`,
       [
         {
@@ -129,7 +110,7 @@ export default function ReviewScreen({ navigation, route }) {
         )}
 
         {/* Contract type selector */}
-        <Text style={styles.sectionLabel}>Contract type</Text>
+        <Text style={styles.sectionLabel}>Document type</Text>
         <Text style={styles.sectionDesc}>Choose a category for a more targeted analysis</Text>
         <View style={styles.typeGrid}>
           {CONTRACT_TYPES.map(({ key, label, desc }) => (
@@ -152,8 +133,8 @@ export default function ReviewScreen({ navigation, route }) {
           The redacted version above is what will be sent for analysis.
         </Text>
 
-        <TouchableOpacity style={styles.btn} onPress={handleAnalyze} disabled={loading}>
-          {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Analyze contract</Text>}
+        <TouchableOpacity style={styles.btn} onPress={handleAnalyze}>
+          <Text style={styles.btnText}>Analyze document</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

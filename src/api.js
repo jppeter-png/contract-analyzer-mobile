@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://contract-analyzer-backend-2ijl.onrender.com';
+export const BASE_URL = 'https://contract-analyzer-backend-2ijl.onrender.com';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -43,11 +43,12 @@ export async function ocrImages(images) {
   return data;
 }
 
-export async function analyzeContract(scrubbedText, contractType = 'auto', chunkContext = null) {
+export async function analyzeContract(scrubbedText, contractType = 'auto', chunkContext = null, signal = null) {
   const body = { scrubbedText, contractType };
   if (chunkContext) body.chunkContext = chunkContext;
   const { data } = await api.post('/api/analyze', body, {
     headers: { 'Content-Type': 'application/json' },
+    signal,
   });
   return data;
 }
