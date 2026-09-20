@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,13 +13,30 @@ import ResultsScreen from './src/screens/ResultsScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import BatchReviewScreen from './src/screens/BatchReviewScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
+import TermsGateScreen from './src/screens/TermsGateScreen';
+import { hasAcceptedCurrentTerms } from './src/terms';
 
 const Stack = createStackNavigator();
 
 export default function App() {
+  const [termsAccepted, setTermsAccepted] = useState(null); // null while checking
+
   useEffect(() => {
     mobileAds().initialize();
+    hasAcceptedCurrentTerms().then(setTermsAccepted);
   }, []);
+
+  if (termsAccepted === null) {
+    return null;
+  }
+
+  if (!termsAccepted) {
+    return (
+      <SafeAreaProvider>
+        <TermsGateScreen onAccept={() => setTermsAccepted(true)} />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -177,7 +177,7 @@ export default function BatchReviewScreen({ navigation, route }) {
 
     const minutes = estimateMinutes(steps.length);
     Alert.alert(
-      'Some contracts are long',
+      'Some documents are long',
       `${filesNeedingChunking} of ${results.length} file${results.length !== 1 ? 's' : ''} exceed the ${MAX_CHARS_PER_ANALYSIS.toLocaleString()}-character single-pass limit. Later sections in those files would be skipped unless you process everything in full.`,
       [
         { text: 'Process anyway (may miss later sections)', onPress: analyzeAll },
@@ -209,7 +209,7 @@ export default function BatchReviewScreen({ navigation, route }) {
 
         <Text style={styles.title}>Batch review</Text>
         <Text style={styles.meta}>
-          {results.length} contract{results.length !== 1 ? 's' : ''} · {totalRedacted} items redacted total
+          {results.length} document{results.length !== 1 ? 's' : ''} · {totalRedacted} items redacted total
         </Text>
 
         {results.map((item, i) => {
@@ -318,7 +318,7 @@ export default function BatchReviewScreen({ navigation, route }) {
                   </Text>
                 </View>
               ) : (
-                <Text style={styles.btnText}>Analyze all {results.length} contracts →</Text>
+                <Text style={styles.btnText}>Analyze all {results.length} documents →</Text>
               )}
             </TouchableOpacity>
 
@@ -338,7 +338,7 @@ export default function BatchReviewScreen({ navigation, route }) {
           </>
         ) : (
           <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('Upload')}>
-            <Text style={styles.newBtnText}>↺ Analyze new contracts</Text>
+            <Text style={styles.newBtnText}>↺ Analyze new documents</Text>
           </TouchableOpacity>
         )}
 

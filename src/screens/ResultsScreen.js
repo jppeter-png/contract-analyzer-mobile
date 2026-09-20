@@ -33,7 +33,7 @@ export default function ResultsScreen({ navigation, route }) {
         {truncated && (
           <View style={styles.truncatedNotice}>
             <Text style={styles.truncatedText}>
-              ⚠ This contract was long — only the first ~8,000 characters were analyzed. Later sections weren't reviewed.
+              ⚠ This document was long — only the first ~8,000 characters were analyzed. Later sections weren't reviewed.
             </Text>
           </View>
         )}
@@ -82,7 +82,7 @@ export default function ResultsScreen({ navigation, route }) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>🛑 Missing protections</Text>
             <Text style={styles.missingSectionNote}>
-              Standard protections this contract doesn't mention — not necessarily unfair, just absent.
+              Standard protections this document doesn't mention — not necessarily unfair, just absent.
             </Text>
             {missingIssues.map((issue, i) => <IssueCard key={`mi-${i}`} issue={issue} />)}
             {missing_protections.map((p, i) => (
@@ -95,7 +95,7 @@ export default function ResultsScreen({ navigation, route }) {
         )}
 
         <Text style={styles.disclaimer}>
-          This analysis is for informational purposes only and does not constitute legal advice. Consult a qualified attorney before signing any contract.
+          This analysis is for informational purposes only and does not constitute legal advice. Consult a qualified attorney before signing any document.
         </Text>
       </ScrollView>
     </SafeAreaView>

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, TextInput, StyleSheet,
-  ScrollView, Alert, ActivityIndicator, Platform,
+  ScrollView, Alert, ActivityIndicator, Platform, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
-import { scrubDocument, scrubText } from '../api';
+import { scrubDocument, scrubText, BASE_URL } from '../api';
 
 const TABS = ['Upload file', 'Paste text', 'Camera', 'History'];
 
@@ -15,6 +15,7 @@ export default function UploadScreen({ navigation }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [analyzingIndex, setAnalyzingIndex] = useState(null);
+  const scrubbing = loading || analyzingIndex !== null;
 
   const handleFilePick = async () => {
     try {
@@ -92,11 +93,20 @@ export default function UploadScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.title}>Contract Analyzer</Text>
+          <Text style={styles.title}>Document Risk Analyzer</Text>
           <Text style={styles.subtitle}>
-            Upload, paste, or photograph a contract. Personal data is removed before any AI analysis.
+            Upload, paste, or photograph a document. Personal data is removed before any AI analysis.
           </Text>
         </View>
+
+        {scrubbing && (
+          <View style={styles.scrubbingNote}>
+            <ActivityIndicator size="small" color="#166534" />
+            <Text style={styles.scrubbingNoteText}>
+              🔒 Scanning for personal information — this can take a bit for longer files.
+            </Text>
+          </View>
+        )}
 
         {/* Tabs */}
         <View style={styles.tabs}>
@@ -178,7 +188,7 @@ export default function UploadScreen({ navigation }) {
                         </Text>
                       </View>
                     ) : (
-                      <Text style={styles.analyzeAllBtnText}>Analyze all {files.length} contracts →</Text>
+                      <Text style={styles.analyzeAllBtnText}>Analyze all {files.length} documents →</Text>
                     )}
                   </TouchableOpacity>
                 )}
@@ -193,7 +203,7 @@ export default function UploadScreen({ navigation }) {
             <TextInput
               style={styles.textArea}
               multiline
-              placeholder="Paste your contract text here..."
+              placeholder="Paste your document text here..."
               placeholderTextColor="#aaa"
               value={pastedText}
               onChangeText={setPastedText}
@@ -216,7 +226,7 @@ export default function UploadScreen({ navigation }) {
         {activeTab === 2 && (
           <TouchableOpacity style={styles.dropZone} onPress={() => navigation.navigate('Camera')}>
             <Text style={styles.dropIcon}>📷</Text>
-            <Text style={styles.dropTitle}>Photograph your contract</Text>
+            <Text style={styles.dropTitle}>Photograph your document</Text>
             <Text style={styles.dropSub}>Take photos or pick from camera roll</Text>
             <Text style={styles.dropSub}>Multiple pages supported</Text>
           </TouchableOpacity>
@@ -227,7 +237,7 @@ export default function UploadScreen({ navigation }) {
           <TouchableOpacity style={styles.dropZone} onPress={() => navigation.navigate('History')}>
             <Text style={styles.dropIcon}>🕓</Text>
             <Text style={styles.dropTitle}>View past analyses</Text>
-            <Text style={styles.dropSub}>Revisit contracts you've already checked</Text>
+            <Text style={styles.dropSub}>Revisit documents you've already checked</Text>
           </TouchableOpacity>
         )}
 
@@ -236,6 +246,17 @@ export default function UploadScreen({ navigation }) {
           <Text style={styles.noticeIcon}>🔒</Text>
           <Text style={styles.noticeText}>
             Names, emails, phone numbers, SSNs, and other personal identifiers are automatically redacted before analysis.
+          </Text>
+        </View>
+
+        {/* Legal notice */}
+        <View style={styles.notice}>
+          <Text style={styles.noticeIcon}>⚖️</Text>
+          <Text style={styles.noticeText}>
+            This app provides general information, not legal advice.{' '}
+            <Text style={styles.noticeLink} onPress={() => Linking.openURL(`${BASE_URL}/terms`)}>
+              Terms of Use
+            </Text>
           </Text>
         </View>
       </ScrollView>
@@ -249,6 +270,12 @@ const styles = StyleSheet.create({
   header: { marginBottom: 28 },
   title: { fontSize: 26, fontWeight: '700', color: '#111', marginBottom: 8 },
   subtitle: { fontSize: 15, color: '#666', lineHeight: 22 },
+  scrubbingNote: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#bbf7d0',
+    borderRadius: 10, padding: 12, marginBottom: 20,
+  },
+  scrubbingNoteText: { flex: 1, fontSize: 13, color: '#166534', lineHeight: 18 },
   tabs: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#e5e5e5', marginBottom: 20 },
   tab: { paddingVertical: 10, paddingHorizontal: 14, marginRight: 4 },
   tabActive: { borderBottomWidth: 2, borderBottomColor: '#111', marginBottom: -1 },
@@ -301,4 +328,5 @@ const styles = StyleSheet.create({
   },
   noticeIcon: { fontSize: 16 },
   noticeText: { flex: 1, fontSize: 13, color: '#666', lineHeight: 19 },
+  noticeLink: { color: '#2f6fd0', fontWeight: '600' },
 });
