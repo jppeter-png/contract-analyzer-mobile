@@ -8,6 +8,7 @@ import { analyzeContract } from '../api';
 import { saveAnalysis } from '../history';
 import { chunkText, mergeAnalyses, estimateMinutes, MAX_CHARS_PER_ANALYSIS, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import RiskBadge from '../components/RiskBadge';
+import { requestAiConsent } from '../aiConsent';
 
 export default function BatchReviewScreen({ navigation, route }) {
   const { results } = route.params;
@@ -164,7 +165,9 @@ export default function BatchReviewScreen({ navigation, route }) {
     ]);
   };
 
-  const handleAnalyzeAllPress = () => {
+  const handleAnalyzeAllPress = async () => {
+    if (!(await requestAiConsent())) return;
+
     const steps = buildBatchSteps();
     const filesNeedingChunking = results.filter(item =>
       !item.error && chunkText(item.scrubResult.scrubbedText, MAX_CHARS_PER_ANALYSIS).length > 1

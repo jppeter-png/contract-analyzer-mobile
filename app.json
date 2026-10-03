@@ -13,7 +13,9 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.josefpeter.contractanalyzer",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Used to select documents from your library.",
+        "NSCameraUsageDescription": "Document Risk Analyzer uses your camera so you can photograph the pages of a document. The photos are read to extract the document's text, which is then redacted of personal details and analyzed. For example, you can take a picture of a printed lease to check it for risky clauses.",
+        "NSMicrophoneUsageDescription": "Document Risk Analyzer never records audio. It only takes still photos of documents, so you will not be asked for microphone access.",
+        "NSPhotoLibraryUsageDescription": "Document Risk Analyzer accesses your photo library only when you choose to pick photos of a document. The selected photos are read to extract the text for analysis. For example, you can select a saved photo of a signed lease to check it for risky clauses.",
         "NSLocalNetworkUsageDescription": "Used to connect to the local development server while developing.",
         "NSBonjourServices": [
           "_dev._tcp",
