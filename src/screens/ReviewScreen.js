@@ -5,6 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
 import { preloadInterstitial } from '../ads';
+import { requestAiConsent } from '../aiConsent';
 
 const CONTRACT_TYPES = [
   { key: 'auto',       label: '🔍 Auto-detect',           desc: "Let AI figure it out" },
@@ -38,7 +39,9 @@ export default function ReviewScreen({ navigation, route }) {
     navigation.navigate('ChunkedAnalyzing', { chunks, contractType: selectedType, fileName, findings, totalRedacted });
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!(await requestAiConsent())) return;
+
     if (scrubbedText.length <= MAX_CHARS_PER_ANALYSIS) {
       runNormalAnalysis();
       return;
@@ -109,7 +112,19 @@ export default function ReviewScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Contract type selector */}
+        {/* Exactly what will be sent */}
+        {!!preview && (
+          <>
+            <Text style={styles.sectionLabel}>Text that will be sent</Text>
+            <View style={styles.previewBox}>
+              <Text style={styles.previewText}>
+                {preview}{scrubbedText.length > preview.length ? '…' : ''}
+              </Text>
+            </View>
+          </>
+        )}
+
+        {/* Document type selector */}
         <Text style={styles.sectionLabel}>Document type</Text>
         <Text style={styles.sectionDesc}>Choose a category for a more targeted analysis</Text>
         <View style={styles.typeGrid}>
@@ -130,7 +145,7 @@ export default function ReviewScreen({ navigation, route }) {
         </View>
 
         <Text style={styles.confirmNote}>
-          The redacted version above is what will be sent for analysis.
+          Only the redacted text is sent, to Groq, a third-party AI service, to generate your analysis. You'll be asked for permission first.
         </Text>
 
         <TouchableOpacity style={styles.btn} onPress={handleAnalyze}>

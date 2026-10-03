@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { scrubDocument, scrubText, BASE_URL } from '../api';
+import { showAiConsentSettings } from '../aiConsent';
 
 const TABS = ['Upload file', 'Paste text', 'Camera', 'History'];
 
@@ -95,7 +96,7 @@ export default function UploadScreen({ navigation }) {
         <View style={styles.header}>
           <Text style={styles.title}>Document Risk Analyzer</Text>
           <Text style={styles.subtitle}>
-            Upload, paste, or photograph a document. Personal data is removed before any AI analysis.
+            Upload, paste, or photograph a document. Common personal identifiers are redacted before any AI analysis.
           </Text>
         </View>
 
@@ -245,7 +246,18 @@ export default function UploadScreen({ navigation }) {
         <View style={styles.notice}>
           <Text style={styles.noticeIcon}>🔒</Text>
           <Text style={styles.noticeText}>
-            Names, emails, phone numbers, SSNs, and other personal identifiers are automatically redacted before analysis.
+            Emails, phone numbers, SSNs, and other common identifiers are automatically redacted, and names where detected. Detection isn't perfect, so you'll preview exactly what is sent.
+          </Text>
+        </View>
+
+        {/* Third-party AI notice */}
+        <View style={styles.notice}>
+          <Text style={styles.noticeIcon}>🤖</Text>
+          <Text style={styles.noticeText}>
+            Redacted text is analyzed by Groq, a third-party AI service, only with your permission.{' '}
+            <Text style={styles.noticeLink} onPress={showAiConsentSettings}>
+              Manage
+            </Text>
           </Text>
         </View>
 
