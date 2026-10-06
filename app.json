@@ -32,13 +32,22 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.josefpeter.contractanalyzer",
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-4330297206877846~5194329303"
-      }
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "plugins": [
       "expo-document-picker",
-      "react-native-google-mobile-ads"
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-4330297206877846~1381252971",
+          "iosAppId": "ca-app-pub-4330297206877846~5194329303"
+        }
+      ],
+      "./plugins/withKotlinMetadataFix"
     ],
     "extra": {
       "eas": {
