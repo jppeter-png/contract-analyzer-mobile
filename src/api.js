@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getLanguage } from './i18n';
 
 export const BASE_URL = 'https://contract-analyzer-backend-2ijl.onrender.com';
 
@@ -27,8 +28,10 @@ export async function scrubText(text) {
   return data;
 }
 
-export async function ocrImages(images) {
+// documentLanguage: the language the pages are written in (English is always read as well).
+export async function ocrImages(images, documentLanguage = getLanguage()) {
   const form = new FormData();
+  form.append('languages', documentLanguage);
   images.forEach((img, i) => {
     form.append('images', {
       uri: img.uri,
@@ -44,7 +47,8 @@ export async function ocrImages(images) {
 }
 
 export async function analyzeContract(scrubbedText, contractType = 'auto', chunkContext = null, signal = null) {
-  const body = { scrubbedText, contractType };
+  // The explanation comes back in the language the user reads, whatever language the document is in.
+  const body = { scrubbedText, contractType, outputLanguage: getLanguage() };
   if (chunkContext) body.chunkContext = chunkContext;
   const { data } = await api.post('/api/analyze', body, {
     headers: { 'Content-Type': 'application/json' },

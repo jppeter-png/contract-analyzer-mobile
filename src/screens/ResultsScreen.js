@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RiskBadge from '../components/RiskBadge';
 import IssueCard from '../components/IssueCard';
+import { t, findingLabel } from '../i18n';
 
 export default function ResultsScreen({ navigation, route }) {
   const { analysis, findings = [], totalRedacted = 0 } = route.params;
@@ -26,15 +27,13 @@ export default function ResultsScreen({ navigation, route }) {
         <View style={styles.headerRow}>
           <RiskBadge risk={overall_risk} large />
           <TouchableOpacity onPress={() => navigation.navigate('Upload')} style={styles.newBtn}>
-            <Text style={styles.newBtnText}>Home</Text>
+            <Text style={styles.newBtnText}>{t('common.home')}</Text>
           </TouchableOpacity>
         </View>
 
         {truncated && (
           <View style={styles.truncatedNotice}>
-            <Text style={styles.truncatedText}>
-              ⚠ This document was long — only the first ~8,000 characters were analyzed. Later sections weren't reviewed.
-            </Text>
+            <Text style={styles.truncatedText}>{t('results.truncated')}</Text>
           </View>
         )}
 
@@ -46,7 +45,7 @@ export default function ResultsScreen({ navigation, route }) {
           {[['high', high.length], ['medium', medium.length], ['low', low.length]].map(([risk, count]) => (
             <View key={risk} style={styles.statChip}>
               <Text style={[styles.statCount, { color: riskColor(risk) }]}>{count}</Text>
-              <Text style={styles.statLabel}>{risk === 'high' ? 'High' : risk === 'medium' ? 'Medium' : 'Low'}</Text>
+              <Text style={styles.statLabel}>{t(`results.${risk}`)}</Text>
             </View>
           ))}
         </View>
@@ -54,14 +53,12 @@ export default function ResultsScreen({ navigation, route }) {
         {/* Redacted items */}
         {totalRedacted > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🔒 Redacted before analysis</Text>
+            <Text style={styles.sectionTitle}>{t('results.redactedTitle')}</Text>
             <View style={styles.redactedBox}>
-              <Text style={styles.redactedSummary}>
-                {totalRedacted} identifier{totalRedacted !== 1 ? 's' : ''} stripped before AI analysis
-              </Text>
+              <Text style={styles.redactedSummary}>{t('results.redactedSummary', { count: totalRedacted })}</Text>
               {findings.map(({ label, count, redacted = [] }) => (
                 <View key={label} style={styles.redactedGroup}>
-                  <Text style={styles.redactedLabel}>{label} ×{count}</Text>
+                  <Text style={styles.redactedLabel}>{findingLabel(label)} ×{count}</Text>
                   {redacted.map((item, i) => (
                     <Text key={i} style={styles.redactedItem}>• {item}</Text>
                   ))}
@@ -73,17 +70,15 @@ export default function ResultsScreen({ navigation, route }) {
 
         {sorted.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>⚠ Issues found</Text>
+            <Text style={styles.sectionTitle}>{t('results.issues')}</Text>
             {sorted.map((issue, i) => <IssueCard key={i} issue={issue} />)}
           </View>
         )}
 
         {(missingIssues.length > 0 || missing_protections.length > 0) && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>🛑 Missing protections</Text>
-            <Text style={styles.missingSectionNote}>
-              Standard protections this document doesn't mention — not necessarily unfair, just absent.
-            </Text>
+            <Text style={styles.sectionTitle}>{t('results.missing')}</Text>
+            <Text style={styles.missingSectionNote}>{t('results.missingNote')}</Text>
             {missingIssues.map((issue, i) => <IssueCard key={`mi-${i}`} issue={issue} />)}
             {missing_protections.map((p, i) => (
               <View key={`mp-${i}`} style={styles.missingItem}>
@@ -94,9 +89,7 @@ export default function ResultsScreen({ navigation, route }) {
           </View>
         )}
 
-        <Text style={styles.disclaimer}>
-          This analysis is for informational purposes only and does not constitute legal advice. Consult a qualified attorney before signing any document.
-        </Text>
+        <Text style={styles.disclaimer}>{t('results.disclaimer')}</Text>
       </ScrollView>
     </SafeAreaView>
   );

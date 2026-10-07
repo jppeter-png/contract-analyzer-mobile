@@ -1,3 +1,5 @@
+import { t } from './i18n';
+
 // Must match backend/src/routes/analyze.js's MAX_INPUT_CHARS.
 export const MAX_CHARS_PER_ANALYSIS = 8000;
 
@@ -65,8 +67,8 @@ export function mergeAnalyses(analyses) {
   const category = analyses.find(a => a.category && a.category !== 'auto')?.category
     || analyses[0].category;
 
-  const summary = `This document was long and analyzed in ${analyses.length} sections. `
-    + analyses.map((a, i) => `Section ${i + 1}: ${a.summary}`).join(' ');
+  const summary = t('chunked.merged', { count: analyses.length })
+    + analyses.map((a, i) => t('chunked.sectionLabel', { number: i + 1, summary: a.summary })).join(' ');
 
   const issues = analyses.flatMap((a, i) =>
     (a.issues || []).map(issue => ({ ...issue, section: i + 1 }))

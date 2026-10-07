@@ -19,7 +19,7 @@ export async function saveAnalysis({ fileName, analysis, findings = [], totalRed
     const entry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       date: new Date().toISOString(),
-      fileName: fileName || 'Pasted text',
+      fileName: fileName || 'Pasted text', // shown translated via displayFileName()
       overall_risk: analysis.overall_risk,
       summary: analysis.summary,
       analysis,

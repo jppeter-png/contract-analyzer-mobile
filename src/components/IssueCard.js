@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
 import RiskBadge from './RiskBadge';
+import { t } from '../i18n';
 
 if (Platform.OS === 'android') {
   UIManager.setLayoutAnimationEnabledExperimental?.(true);
@@ -23,7 +24,7 @@ export default function IssueCard({ issue }) {
       <TouchableOpacity onPress={toggle} style={styles.row} activeOpacity={0.7}>
         {isMissingProtection ? (
           <View style={styles.missingBadge}>
-            <Text style={styles.missingBadgeText}>Missing protection</Text>
+            <Text style={styles.missingBadgeText}>{t('issue.missingProtection')}</Text>
           </View>
         ) : (
           <RiskBadge risk={severity} />
@@ -37,7 +38,7 @@ export default function IssueCard({ issue }) {
           <Text style={styles.category}>{category}</Text>
           <Text style={styles.description}>{description}</Text>
           <View style={[styles.recoBox, { borderLeftColor: recoBorderColor }]}>
-            <Text style={styles.recoLabel}>Recommendation</Text>
+            <Text style={styles.recoLabel}>{t('issue.recommendation')}</Text>
             <Text style={styles.recoText}>{recommendation}</Text>
           </View>
         </View>

@@ -9,6 +9,7 @@ import { saveAnalysis } from '../history';
 import { chunkText, mergeAnalyses, estimateMinutes, MAX_CHARS_PER_ANALYSIS, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import RiskBadge from '../components/RiskBadge';
 import { requestAiConsent } from '../aiConsent';
+import { t, findingLabel } from '../i18n';
 
 export default function BatchReviewScreen({ navigation, route }) {
   const { results } = route.params;
@@ -159,9 +160,9 @@ export default function BatchReviewScreen({ navigation, route }) {
   };
 
   const handleCancelChunked = () => {
-    Alert.alert('Cancel analysis?', 'Files not yet analyzed will be skipped.', [
-      { text: 'Keep going', style: 'cancel' },
-      { text: 'Cancel', style: 'destructive', onPress: () => { cancelledRef.current = true; } },
+    Alert.alert(t('analyzing.cancelTitle'), t('batch.cancelMessage'), [
+      { text: t('analyzing.keepGoing'), style: 'cancel' },
+      { text: t('common.cancel'), style: 'destructive', onPress: () => { cancelledRef.current = true; } },
     ]);
   };
 
@@ -180,12 +181,16 @@ export default function BatchReviewScreen({ navigation, route }) {
 
     const minutes = estimateMinutes(steps.length);
     Alert.alert(
-      'Some documents are long',
-      `${filesNeedingChunking} of ${results.length} file${results.length !== 1 ? 's' : ''} exceed the ${MAX_CHARS_PER_ANALYSIS.toLocaleString()}-character single-pass limit. Later sections in those files would be skipped unless you process everything in full.`,
+      t('batch.long.title'),
+      t('batch.long.message', {
+        count: filesNeedingChunking,
+        total: results.length,
+        limit: MAX_CHARS_PER_ANALYSIS.toLocaleString(),
+      }),
       [
-        { text: 'Process anyway (may miss later sections)', onPress: analyzeAll },
-        { text: `Process in full, ~${minutes} min (${steps.length} sections total)`, onPress: analyzeAllChunked },
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('review.long.anyway'), onPress: analyzeAll },
+        { text: t('batch.long.full', { minutes, sections: steps.length }), onPress: analyzeAllChunked },
+        { text: t('common.cancel'), style: 'cancel' },
       ]
     );
   };
@@ -207,12 +212,12 @@ export default function BatchReviewScreen({ navigation, route }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity onPress={() => navigation.navigate('Upload')} style={styles.back}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Batch review</Text>
+        <Text style={styles.title}>{t('batch.title')}</Text>
         <Text style={styles.meta}>
-          {results.length} document{results.length !== 1 ? 's' : ''} · {totalRedacted} items redacted total
+          {t('batch.docs', { count: results.length })} · {t('batch.itemsTotal', { count: totalRedacted })}
         </Text>
 
         {results.map((item, i) => {
@@ -231,8 +236,8 @@ export default function BatchReviewScreen({ navigation, route }) {
                 <View style={styles.cardMeta}>
                   <Text style={styles.cardName} numberOfLines={1}>{item.fileName}</Text>
                   <Text style={styles.cardSub}>
-                    {item.scrubResult?.wordCount?.toLocaleString()} words
-                    {total > 0 ? ` · ${total} item${total !== 1 ? 's' : ''} redacted` : ' · no PII found'}
+                    {t('batch.words', { count: item.scrubResult?.wordCount ?? 0 })}
+                    {total > 0 ? ` · ${t('batch.itemRedacted', { count: total })}` : ` · ${t('batch.noPii')}`}
                   </Text>
                 </View>
                 {analyzing && currentIndex === i && <ActivityIndicator size="small" color="#111" />}
@@ -248,7 +253,7 @@ export default function BatchReviewScreen({ navigation, route }) {
                   >
                     <Text style={styles.redactedToggleIcon}>🔒</Text>
                     <Text style={styles.redactedToggleText}>
-                      {total} identifier{total !== 1 ? 's' : ''} redacted
+                      {t('batch.identifiersRedacted', { count: total })}
                     </Text>
                     <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
                   </TouchableOpacity>
@@ -265,7 +270,7 @@ export default function BatchReviewScreen({ navigation, route }) {
                               onPress={() => finding.redacted?.length && toggleFinding(i, fi)}
                             >
                               <View style={styles.pill}>
-                                <Text style={styles.pillText}>{finding.label} ×{finding.count}</Text>
+                                <Text style={styles.pillText}>{findingLabel(finding.label)} ×{finding.count}</Text>
                               </View>
                               {finding.redacted?.length > 0 && (
                                 <Text style={styles.expandHint}>{fExpanded ? '▲' : '▼'}</Text>
@@ -287,16 +292,16 @@ export default function BatchReviewScreen({ navigation, route }) {
               )}
 
               {/* Error */}
-              {item.error && <Text style={styles.errorText}>⚠ Could not process: {item.error}</Text>}
+              {item.error && <Text style={styles.errorText}>{t('batch.couldNotProcess', { error: item.error })}</Text>}
 
               {/* View results button */}
               {analysis && !analysis.error && (
                 <TouchableOpacity style={styles.viewBtn} onPress={() => viewResult(i)}>
-                  <Text style={styles.viewBtnText}>View full results →</Text>
+                  <Text style={styles.viewBtnText}>{t('batch.viewFull')}</Text>
                 </TouchableOpacity>
               )}
               {analysis?.error && (
-                <Text style={styles.errorText}>Analysis failed: {analysis.error}</Text>
+                <Text style={styles.errorText}>{t('batch.analysisFailed', { error: analysis.error })}</Text>
               )}
             </View>
           );
@@ -314,40 +319,45 @@ export default function BatchReviewScreen({ navigation, route }) {
                   <ActivityIndicator color="#fff" size="small" />
                   <Text style={styles.btnText}>
                     {stepInfo?.waiting
-                      ? `Waiting ${stepInfo.waitSeconds ?? ''}s to avoid rate limits...`
+                      ? t('batch.waiting', { seconds: stepInfo.waitSeconds ?? '' })
                       : stepInfo
-                        ? `Analyzing file ${currentIndex + 1} of ${results.length}${stepInfo.totalChunksForFile > 1 ? ` (section ${stepInfo.chunkIndex} of ${stepInfo.totalChunksForFile})` : ''}...`
-                        : `Analyzing ${currentIndex !== null ? `${currentIndex + 1} of ${results.length}` : ''}...`}
+                        ? (stepInfo.totalChunksForFile > 1
+                          ? t('batch.fileSectionProgress', {
+                            current: currentIndex + 1, total: results.length,
+                            section: stepInfo.chunkIndex, sections: stepInfo.totalChunksForFile,
+                          })
+                          : t('batch.fileProgress', { current: currentIndex + 1, total: results.length }))
+                        : (currentIndex !== null
+                          ? t('batch.analyzingOf', { current: currentIndex + 1, total: results.length })
+                          : t('batch.analyzing'))}
                   </Text>
                 </View>
               ) : (
-                <Text style={styles.btnText}>Analyze all {results.length} documents →</Text>
+                <Text style={styles.btnText}>{t('batch.analyzeAll', { count: results.length })}</Text>
               )}
             </TouchableOpacity>
 
             {analyzing && stepInfo && (
               <View style={styles.batchProgressRow}>
                 <Text style={styles.batchProgressText}>
-                  Step {stepInfo.step} of {stepInfo.totalSteps}
+                  {t('batch.stepOf', { step: stepInfo.step, total: stepInfo.totalSteps })}
                   {stepInfo.totalSteps - stepInfo.step > 0
-                    ? ` · ~${estimateMinutes(stepInfo.totalSteps - stepInfo.step)} min remaining`
+                    ? t('batch.minutesRemaining', { minutes: estimateMinutes(stepInfo.totalSteps - stepInfo.step) })
                     : ''}
                 </Text>
                 <TouchableOpacity onPress={handleCancelChunked}>
-                  <Text style={styles.batchCancelText}>Cancel</Text>
+                  <Text style={styles.batchCancelText}>{t('common.cancel')}</Text>
                 </TouchableOpacity>
               </View>
             )}
           </>
         ) : (
           <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('Upload')}>
-            <Text style={styles.newBtnText}>↺ Analyze new documents</Text>
+            <Text style={styles.newBtnText}>{t('batch.analyzeNew')}</Text>
           </TouchableOpacity>
         )}
 
-        <Text style={styles.disclaimer}>
-          This analysis is for informational purposes only and does not constitute legal advice.
-        </Text>
+        <Text style={styles.disclaimer}>{t('batch.disclaimer')}</Text>
       </ScrollView>
     </SafeAreaView>
   );

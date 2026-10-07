@@ -4,12 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
 import { saveAnalysis } from '../history';
 import { showInterstitial } from '../ads';
+import { t } from '../i18n';
 
-const STEPS = [
-  'Reading document clauses...',
-  'Identifying risks and loopholes...',
-  'Preparing your report...',
-];
+const STEP_KEYS = ['analyzing.step1', 'analyzing.step2', 'analyzing.step3'];
 
 export default function AnalyzingScreen({ navigation, route }) {
   const { scrubbedText, contractType, fileName, findings, totalRedacted } = route.params;
@@ -18,7 +15,7 @@ export default function AnalyzingScreen({ navigation, route }) {
 
   useEffect(() => {
     const stepTimer = setInterval(() => {
-      setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+      setStepIndex((i) => Math.min(i + 1, STEP_KEYS.length - 1));
     }, 4000);
 
     // No real progress signal from the backend (one request, one response), so
@@ -47,7 +44,7 @@ export default function AnalyzingScreen({ navigation, route }) {
       } catch (err) {
         if (controller.signal.aborted) return;
         navigation.goBack();
-        Alert.alert('Analysis failed', err.response?.data?.error || err.message || 'Please try again');
+        Alert.alert(t('analyzing.failed'), err.response?.data?.error || err.message || t('common.tryAgain'));
       }
     })();
 
@@ -60,9 +57,9 @@ export default function AnalyzingScreen({ navigation, route }) {
   }, []);
 
   const handleCancel = () => {
-    Alert.alert('Cancel analysis?', 'Your progress will be lost.', [
-      { text: 'Keep going', style: 'cancel' },
-      { text: 'Cancel', style: 'destructive', onPress: () => navigation.goBack() },
+    Alert.alert(t('analyzing.cancelTitle'), t('analyzing.cancelMessage'), [
+      { text: t('analyzing.keepGoing'), style: 'cancel' },
+      { text: t('common.cancel'), style: 'destructive', onPress: () => navigation.goBack() },
     ]);
   };
 
@@ -70,15 +67,15 @@ export default function AnalyzingScreen({ navigation, route }) {
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#111" style={styles.spinner} />
-        <Text style={styles.step}>{STEPS[stepIndex]}</Text>
-        <Text style={styles.note}>This usually takes 10–20 seconds</Text>
+        <Text style={styles.step}>{t(STEP_KEYS[stepIndex])}</Text>
+        <Text style={styles.note}>{t('analyzing.note')}</Text>
 
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
         </View>
 
         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
-          <Text style={styles.cancelBtnText}>Cancel</Text>
+          <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

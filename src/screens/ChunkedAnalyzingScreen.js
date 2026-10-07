@@ -5,6 +5,7 @@ import { analyzeContract } from '../api';
 import { mergeAnalyses, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import { saveAnalysis } from '../history';
 import { showInterstitial } from '../ads';
+import { t } from '../i18n';
 
 export default function ChunkedAnalyzingScreen({ navigation, route }) {
   const { chunks, contractType, fileName, findings, totalRedacted } = route.params;
@@ -44,8 +45,11 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
         } catch (err) {
           if (cancelledRef.current) return;
           Alert.alert(
-            'Analysis failed',
-            `Section ${i + 1} of ${chunks.length} failed: ${err.response?.data?.error || err.message || 'Please try again'}`
+            t('analyzing.failed'),
+            t('chunked.sectionFailed', {
+              current: i + 1, total: chunks.length,
+              error: err.response?.data?.error || err.message || t('common.tryAgain'),
+            })
           );
           navigation.goBack();
           return;
@@ -88,10 +92,10 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
   }, []);
 
   const handleCancel = () => {
-    Alert.alert('Cancel analysis?', 'Progress on the current section will be lost.', [
-      { text: 'Keep going', style: 'cancel' },
+    Alert.alert(t('analyzing.cancelTitle'), t('chunked.cancelMessage'), [
+      { text: t('analyzing.keepGoing'), style: 'cancel' },
       {
-        text: 'Cancel',
+        text: t('common.cancel'),
         style: 'destructive',
         onPress: () => {
           cancelledRef.current = true;
@@ -112,13 +116,13 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
         <ActivityIndicator size="large" color="#111" style={styles.spinner} />
         <Text style={styles.step}>
           {waiting
-            ? `Waiting to avoid rate limits... (${secondsLeft}s)`
-            : `Analyzing section ${currentIndex + 1} of ${chunks.length}...`}
+            ? t('chunked.waiting', { seconds: secondsLeft })
+            : t('chunked.section', { current: currentIndex + 1, total: chunks.length })}
         </Text>
         <Text style={styles.note}>
           {remainingChunks > 0
-            ? `About ${etaMinutes} minute${etaMinutes !== 1 ? 's' : ''} remaining`
-            : 'Almost done'}
+            ? t('chunked.eta', { count: etaMinutes })
+            : t('chunked.almostDone')}
         </Text>
 
         <View style={styles.progressTrack}>
@@ -126,7 +130,7 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
         </View>
 
         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel}>
-          <Text style={styles.cancelBtnText}>Cancel</Text>
+          <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

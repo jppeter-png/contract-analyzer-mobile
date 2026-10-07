@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import RiskBadge from '../components/RiskBadge';
 import { getHistory, deleteHistoryEntry, clearHistory } from '../history';
+import { t, displayFileName } from '../i18n';
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -25,10 +26,10 @@ export default function HistoryScreen({ navigation }) {
   );
 
   const handleDelete = (id) => {
-    Alert.alert('Delete analysis', 'Remove this from your history?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('history.deleteTitle'), t('history.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('history.delete'),
         style: 'destructive',
         onPress: async () => setEntries(await deleteHistoryEntry(id)),
       },
@@ -36,10 +37,10 @@ export default function HistoryScreen({ navigation }) {
   };
 
   const handleClearAll = () => {
-    Alert.alert('Clear history', 'Remove all past analyses?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('history.clearTitle'), t('history.clearMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Clear all',
+        text: t('common.clearAll'),
         style: 'destructive',
         onPress: async () => {
           await clearHistory();
@@ -62,12 +63,12 @@ export default function HistoryScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>History</Text>
+        <Text style={styles.title}>{t('history.title')}</Text>
         {entries.length > 0 ? (
           <TouchableOpacity onPress={handleClearAll}>
-            <Text style={styles.clearAll}>Clear all</Text>
+            <Text style={styles.clearAll}>{t('common.clearAll')}</Text>
           </TouchableOpacity>
         ) : (
           <View style={{ width: 60 }} />
@@ -78,15 +79,15 @@ export default function HistoryScreen({ navigation }) {
         {loaded && entries.length === 0 && (
           <View style={styles.empty}>
             <Text style={styles.emptyIcon}>🕓</Text>
-            <Text style={styles.emptyTitle}>No past analyses yet</Text>
-            <Text style={styles.emptySub}>Documents you analyze will show up here.</Text>
+            <Text style={styles.emptyTitle}>{t('history.emptyTitle')}</Text>
+            <Text style={styles.emptySub}>{t('history.emptySub')}</Text>
           </View>
         )}
 
         {entries.map((entry) => (
           <TouchableOpacity key={entry.id} style={styles.card} onPress={() => openEntry(entry)}>
             <View style={styles.cardTop}>
-              <Text style={styles.fileName} numberOfLines={1}>{entry.fileName}</Text>
+              <Text style={styles.fileName} numberOfLines={1}>{displayFileName(entry.fileName)}</Text>
               <TouchableOpacity onPress={() => handleDelete(entry.id)} style={styles.deleteBtn}>
                 <Text style={styles.deleteBtnText}>✕</Text>
               </TouchableOpacity>

@@ -7,8 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { scrubDocument, scrubText, BASE_URL } from '../api';
 import { showAiConsentSettings } from '../aiConsent';
+import { t, getLanguage } from '../i18n';
 
-const TABS = ['Upload file', 'Paste text', 'Camera', 'History'];
+const TAB_KEYS = ['upload.tab.file', 'upload.tab.paste', 'upload.tab.camera', 'upload.tab.history'];
 
 export default function UploadScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState(0);
@@ -37,7 +38,7 @@ export default function UploadScreen({ navigation }) {
         return [...prev, ...newFiles];
       });
     } catch (err) {
-      Alert.alert('Error', err.message || 'Could not pick files');
+      Alert.alert(t('common.error'), err.message || t('upload.err.pick'));
     }
   };
 
@@ -51,7 +52,7 @@ export default function UploadScreen({ navigation }) {
       const scrubResult = await scrubDocument(file);
       navigation.navigate('Review', { scrubResult, fileName: file.name });
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.error || err.message || 'Could not process file');
+      Alert.alert(t('common.error'), err.response?.data?.error || err.message || t('upload.err.file'));
     } finally {
       setAnalyzingIndex(null);
     }
@@ -84,7 +85,7 @@ export default function UploadScreen({ navigation }) {
       const data = await scrubText(pastedText.trim());
       navigation.navigate('Review', { scrubResult: data });
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.error || err.message || 'Could not process text');
+      Alert.alert(t('common.error'), err.response?.data?.error || err.message || t('upload.err.text'));
     } finally {
       setLoading(false);
     }
@@ -95,29 +96,25 @@ export default function UploadScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Text style={styles.title}>Document Risk Analyzer</Text>
-          <Text style={styles.subtitle}>
-            Upload, paste, or photograph a document. Common personal identifiers are redacted before any AI analysis.
-          </Text>
+          <Text style={styles.subtitle}>{t('upload.subtitle')}</Text>
         </View>
 
         {scrubbing && (
           <View style={styles.scrubbingNote}>
             <ActivityIndicator size="small" color="#166534" />
-            <Text style={styles.scrubbingNoteText}>
-              🔒 Scanning for personal information — this can take a bit for longer files.
-            </Text>
+            <Text style={styles.scrubbingNoteText}>{t('upload.scanning')}</Text>
           </View>
         )}
 
         {/* Tabs */}
         <View style={styles.tabs}>
-          {TABS.map((tab, i) => (
+          {TAB_KEYS.map((tabKey, i) => (
             <TouchableOpacity
-              key={tab}
+              key={tabKey}
               style={[styles.tab, activeTab === i && styles.tabActive]}
               onPress={() => setActiveTab(i)}
             >
-              <Text style={[styles.tabText, activeTab === i && styles.tabTextActive]}>{tab}</Text>
+              <Text style={[styles.tabText, activeTab === i && styles.tabTextActive]}>{t(tabKey)}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -127,17 +124,17 @@ export default function UploadScreen({ navigation }) {
           <View>
             <TouchableOpacity style={styles.dropZone} onPress={handleFilePick} disabled={loading}>
               <Text style={styles.dropIcon}>📄</Text>
-              <Text style={styles.dropTitle}>Tap to select files</Text>
-              <Text style={styles.dropSub}>PDF, DOCX, or TXT · select multiple</Text>
+              <Text style={styles.dropTitle}>{t('upload.drop.title')}</Text>
+              <Text style={styles.dropSub}>{t('upload.drop.sub')}</Text>
             </TouchableOpacity>
 
             {/* File list */}
             {files.length > 0 && (
               <View style={styles.fileList}>
                 <View style={styles.fileListHeader}>
-                  <Text style={styles.fileListTitle}>{files.length} file{files.length !== 1 ? 's' : ''} selected</Text>
+                  <Text style={styles.fileListTitle}>{t('upload.filesSelected', { count: files.length })}</Text>
                   <TouchableOpacity onPress={() => setFiles([])}>
-                    <Text style={styles.clearAll}>Clear all</Text>
+                    <Text style={styles.clearAll}>{t('common.clearAll')}</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -164,7 +161,7 @@ export default function UploadScreen({ navigation }) {
                             onPress={() => analyzeFile(file, i)}
                             disabled={loading || analyzingIndex !== null}
                           >
-                            <Text style={styles.analyzeOneBtnText}>Analyze</Text>
+                            <Text style={styles.analyzeOneBtnText}>{t('upload.analyze')}</Text>
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => removeFile(i)} style={styles.removeBtn}>
                             <Text style={styles.removeBtnText}>✕</Text>
@@ -185,11 +182,13 @@ export default function UploadScreen({ navigation }) {
                       <View style={styles.loadingRow}>
                         <ActivityIndicator color="#fff" size="small" />
                         <Text style={styles.analyzeAllBtnText}>
-                          Analyzing {analyzingIndex !== null ? `${analyzingIndex + 1} of ${files.length}` : ''}...
+                          {analyzingIndex !== null
+                            ? t('upload.analyzingOf', { current: analyzingIndex + 1, total: files.length })
+                            : t('upload.analyzing')}
                         </Text>
                       </View>
                     ) : (
-                      <Text style={styles.analyzeAllBtnText}>Analyze all {files.length} documents →</Text>
+                      <Text style={styles.analyzeAllBtnText}>{t('upload.analyzeAll', { count: files.length })}</Text>
                     )}
                   </TouchableOpacity>
                 )}
@@ -204,7 +203,7 @@ export default function UploadScreen({ navigation }) {
             <TextInput
               style={styles.textArea}
               multiline
-              placeholder="Paste your document text here..."
+              placeholder={t('upload.pastePlaceholder')}
               placeholderTextColor="#aaa"
               value={pastedText}
               onChangeText={setPastedText}
@@ -217,7 +216,7 @@ export default function UploadScreen({ navigation }) {
             >
               {loading
                 ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.analyzeAllBtnText}>Continue →</Text>
+                : <Text style={styles.analyzeAllBtnText}>{t('upload.continue')}</Text>
               }
             </TouchableOpacity>
           </View>
@@ -227,9 +226,9 @@ export default function UploadScreen({ navigation }) {
         {activeTab === 2 && (
           <TouchableOpacity style={styles.dropZone} onPress={() => navigation.navigate('Camera')}>
             <Text style={styles.dropIcon}>📷</Text>
-            <Text style={styles.dropTitle}>Photograph your document</Text>
-            <Text style={styles.dropSub}>Take photos or pick from camera roll</Text>
-            <Text style={styles.dropSub}>Multiple pages supported</Text>
+            <Text style={styles.dropTitle}>{t('upload.camera.title')}</Text>
+            <Text style={styles.dropSub}>{t('upload.camera.sub1')}</Text>
+            <Text style={styles.dropSub}>{t('upload.camera.sub2')}</Text>
           </TouchableOpacity>
         )}
 
@@ -237,37 +236,44 @@ export default function UploadScreen({ navigation }) {
         {activeTab === 3 && (
           <TouchableOpacity style={styles.dropZone} onPress={() => navigation.navigate('History')}>
             <Text style={styles.dropIcon}>🕓</Text>
-            <Text style={styles.dropTitle}>View past analyses</Text>
-            <Text style={styles.dropSub}>Revisit documents you've already checked</Text>
+            <Text style={styles.dropTitle}>{t('upload.history.title')}</Text>
+            <Text style={styles.dropSub}>{t('upload.history.sub')}</Text>
           </TouchableOpacity>
         )}
 
         {/* Privacy notice */}
         <View style={styles.notice}>
           <Text style={styles.noticeIcon}>🔒</Text>
-          <Text style={styles.noticeText}>
-            Emails, phone numbers, SSNs, and other common identifiers are automatically redacted, and names where detected. Detection isn't perfect, so you'll preview exactly what is sent.
-          </Text>
+          <Text style={styles.noticeText}>{t('upload.notice.privacy')}</Text>
         </View>
 
         {/* Third-party AI notice */}
         <View style={styles.notice}>
           <Text style={styles.noticeIcon}>🤖</Text>
           <Text style={styles.noticeText}>
-            Redacted text is analyzed by Groq, a third-party AI service, only with your permission.{' '}
+            {t('upload.notice.ai')}{' '}
             <Text style={styles.noticeLink} onPress={showAiConsentSettings}>
-              Manage
+              {t('upload.notice.manage')}
             </Text>
           </Text>
         </View>
+
+        {/* Language */}
+        <TouchableOpacity style={styles.notice} onPress={() => navigation.navigate('Language')} activeOpacity={0.7}>
+          <Text style={styles.noticeIcon}>🌐</Text>
+          <Text style={styles.noticeText}>
+            {t('upload.notice.language')}{' '}
+            <Text style={styles.noticeLink}>{t(`lang.${getLanguage()}`)}</Text>
+          </Text>
+        </TouchableOpacity>
 
         {/* Legal notice */}
         <View style={styles.notice}>
           <Text style={styles.noticeIcon}>⚖️</Text>
           <Text style={styles.noticeText}>
-            This app provides general information, not legal advice.{' '}
+            {t('upload.notice.legal')}{' '}
             <Text style={styles.noticeLink} onPress={() => Linking.openURL(`${BASE_URL}/terms`)}>
-              Terms of Use
+              {t('upload.notice.termsLink')}
             </Text>
           </Text>
         </View>

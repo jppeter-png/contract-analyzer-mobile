@@ -14,20 +14,35 @@ import CameraScreen from './src/screens/CameraScreen';
 import BatchReviewScreen from './src/screens/BatchReviewScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import TermsGateScreen from './src/screens/TermsGateScreen';
+import LanguageScreen from './src/screens/LanguageScreen';
 import { hasAcceptedCurrentTerms } from './src/terms';
+import { loadLanguage, subscribeLanguage } from './src/i18n';
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const [termsAccepted, setTermsAccepted] = useState(null); // null while checking
+  const [language, setLanguage] = useState(undefined); // undefined while checking, null = not chosen yet
 
   useEffect(() => {
     mobileAds().initialize();
     hasAcceptedCurrentTerms().then(setTermsAccepted);
+    loadLanguage().then(setLanguage);
+    // Choosing a language (first launch or later) redraws the app in it.
+    return subscribeLanguage(setLanguage);
   }, []);
 
-  if (termsAccepted === null) {
+  if (termsAccepted === null || language === undefined) {
     return null;
+  }
+
+  // Nothing is translated until the user picks a language.
+  if (language === null) {
+    return (
+      <SafeAreaProvider>
+        <LanguageScreen />
+      </SafeAreaProvider>
+    );
   }
 
   if (!termsAccepted) {
@@ -41,7 +56,8 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <NavigationContainer>
+        {/* key: remounting redraws every screen when the language changes */}
+        <NavigationContainer key={language}>
           <Stack.Navigator
             initialRouteName="Upload"
             screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
@@ -51,6 +67,7 @@ export default function App() {
             <Stack.Screen name="Review" component={ReviewScreen} />
             <Stack.Screen name="BatchReview" component={BatchReviewScreen} />
             <Stack.Screen name="History" component={HistoryScreen} />
+            <Stack.Screen name="Language" component={LanguageScreen} />
             <Stack.Screen name="Analyzing" component={AnalyzingScreen} />
             <Stack.Screen name="ChunkedAnalyzing" component={ChunkedAnalyzingScreen} />
             <Stack.Screen name="Results" component={ResultsScreen} />

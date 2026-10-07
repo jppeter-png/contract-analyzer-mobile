@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { ocrImages, scrubText } from '../api';
+import { t, getLanguage, SUPPORTED_LANGUAGES } from '../i18n';
 
 const { width } = Dimensions.get('window');
 const THUMB = (width - 48 - 12) / 3;
@@ -17,6 +18,9 @@ export default function CameraScreen({ navigation }) {
   const [showCamera, setShowCamera] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
+  // The language the pages are written in (not the app's language): it decides how the
+  // photos are read. Defaults to the user's own language; English is always included.
+  const [documentLanguage, setDocumentLanguage] = useState(getLanguage());
   const cameraRef = useRef(null);
 
   // Pick from camera roll
@@ -38,7 +42,7 @@ export default function CameraScreen({ navigation }) {
       const photo = await cameraRef.current.takePictureAsync({ quality: 0.9 });
       setPages(prev => [...prev, { uri: photo.uri }]);
     } catch (err) {
-      Alert.alert('Error', 'Could not take photo');
+      Alert.alert(t('common.error'), t('camera.err.photo'));
     }
   };
 
@@ -52,21 +56,21 @@ export default function CameraScreen({ navigation }) {
     setProcessing(true);
 
     try {
-      setStatusMsg(`Running OCR on ${pages.length} page${pages.length !== 1 ? 's' : ''}...`);
-      const { text, pageCount, wordCount } = await ocrImages(pages);
+      setStatusMsg(t('camera.ocrRunning', { count: pages.length }));
+      const { text, pageCount, wordCount } = await ocrImages(pages, documentLanguage);
 
       if (!text.trim()) {
-        Alert.alert('No text found', 'Could not extract any text from the images. Try taking clearer photos.');
+        Alert.alert(t('camera.noTextTitle'), t('camera.noTextMessage'));
         setProcessing(false);
         return;
       }
 
-      setStatusMsg('Scanning for personal information...');
+      setStatusMsg(t('camera.scanning'));
       const scrubResult = await scrubText(text);
 
       navigation.navigate('Review', { scrubResult });
     } catch (err) {
-      Alert.alert('Error', err.response?.data?.error || err.message || 'Something went wrong');
+      Alert.alert(t('common.error'), err.response?.data?.error || err.message || t('camera.err.generic'));
     } finally {
       setProcessing(false);
       setStatusMsg('');
@@ -78,7 +82,7 @@ export default function CameraScreen({ navigation }) {
     if (!permission?.granted) {
       const { granted } = await requestPermission();
       if (!granted) {
-        Alert.alert('Camera access needed', 'Please allow camera access in Settings to take photos of documents.');
+        Alert.alert(t('camera.permTitle'), t('camera.permMessage'));
         return;
       }
     }
@@ -91,7 +95,7 @@ export default function CameraScreen({ navigation }) {
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#111" />
           <Text style={styles.processingText}>{statusMsg}</Text>
-          <Text style={styles.processingNote}>This may take a moment for multiple pages</Text>
+          <Text style={styles.processingNote}>{t('camera.processingNote')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -104,12 +108,12 @@ export default function CameraScreen({ navigation }) {
           {/* Top bar */}
           <SafeAreaView style={styles.cameraTop}>
             <TouchableOpacity onPress={() => setShowCamera(false)} style={styles.cameraTopBtn}>
-              <Text style={styles.cameraTopBtnText}>✕ Close</Text>
+              <Text style={styles.cameraTopBtnText}>{t('camera.close')}</Text>
             </TouchableOpacity>
-            <Text style={styles.pageCount}>{pages.length} page{pages.length !== 1 ? 's' : ''} captured</Text>
+            <Text style={styles.pageCount}>{t('camera.captured', { count: pages.length })}</Text>
             {pages.length > 0 && (
               <TouchableOpacity onPress={() => setShowCamera(false)} style={styles.cameraTopBtn}>
-                <Text style={[styles.cameraTopBtnText, { color: '#4ade80' }]}>Done</Text>
+                <Text style={[styles.cameraTopBtnText, { color: '#4ade80' }]}>{t('camera.done')}</Text>
               </TouchableOpacity>
             )}
           </SafeAreaView>
@@ -118,7 +122,7 @@ export default function CameraScreen({ navigation }) {
           <View style={styles.cameraBottom}>
             <TouchableOpacity onPress={pickFromLibrary} style={styles.sideBtn}>
               <Text style={styles.sideBtnText}>📁</Text>
-              <Text style={styles.sideBtnLabel}>Library</Text>
+              <Text style={styles.sideBtnLabel}>{t('camera.library')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={takePicture} style={styles.shutter}>
               <View style={styles.shutterInner} />
@@ -134,23 +138,38 @@ export default function CameraScreen({ navigation }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Photograph document</Text>
-        <Text style={styles.subtitle}>
-          Take photos of each page or pick from your camera roll. We'll extract the text automatically.
-        </Text>
+        <Text style={styles.title}>{t('camera.title')}</Text>
+        <Text style={styles.subtitle}>{t('camera.subtitle')}</Text>
+
+        {/* Language the document is written in */}
+        <Text style={styles.langLabel}>{t('camera.language')}</Text>
+        <View style={styles.langRow}>
+          {SUPPORTED_LANGUAGES.map((code) => (
+            <TouchableOpacity
+              key={code}
+              style={[styles.langChip, documentLanguage === code && styles.langChipActive]}
+              onPress={() => setDocumentLanguage(code)}
+            >
+              <Text style={[styles.langChipText, documentLanguage === code && styles.langChipTextActive]}>
+                {t(`lang.${code}`)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={styles.langHint}>{t('camera.languageHint')}</Text>
 
         {/* Action buttons */}
         <View style={styles.actions}>
           <TouchableOpacity style={styles.actionBtn} onPress={openCamera}>
             <Text style={styles.actionIcon}>📷</Text>
-            <Text style={styles.actionLabel}>Take photo</Text>
+            <Text style={styles.actionLabel}>{t('camera.takePhoto')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn} onPress={pickFromLibrary}>
             <Text style={styles.actionIcon}>🖼</Text>
-            <Text style={styles.actionLabel}>Camera roll</Text>
+            <Text style={styles.actionLabel}>{t('camera.roll')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -158,9 +177,9 @@ export default function CameraScreen({ navigation }) {
         {pages.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{pages.length} page{pages.length !== 1 ? 's' : ''} ready</Text>
+              <Text style={styles.sectionTitle}>{t('camera.pagesReady', { count: pages.length })}</Text>
               <TouchableOpacity onPress={() => setPages([])}>
-                <Text style={styles.clearText}>Clear all</Text>
+                <Text style={styles.clearText}>{t('common.clearAll')}</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.grid}>
@@ -178,7 +197,7 @@ export default function CameraScreen({ navigation }) {
               {/* Add more button */}
               <TouchableOpacity style={[styles.thumb, styles.thumbAdd]} onPress={openCamera}>
                 <Text style={styles.thumbAddIcon}>+</Text>
-                <Text style={styles.thumbAddLabel}>Add page</Text>
+                <Text style={styles.thumbAddLabel}>{t('camera.addPage')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -186,19 +205,17 @@ export default function CameraScreen({ navigation }) {
 
         {/* Tips */}
         <View style={styles.tips}>
-          <Text style={styles.tipsTitle}>📌 Tips for best results</Text>
-          <Text style={styles.tip}>• Lay the document flat on a solid surface</Text>
-          <Text style={styles.tip}>• Make sure all text is in frame and in focus</Text>
-          <Text style={styles.tip}>• Good lighting improves accuracy</Text>
-          <Text style={styles.tip}>• Add pages in order — they'll be combined automatically</Text>
+          <Text style={styles.tipsTitle}>{t('camera.tipsTitle')}</Text>
+          <Text style={styles.tip}>{t('camera.tip1')}</Text>
+          <Text style={styles.tip}>{t('camera.tip2')}</Text>
+          <Text style={styles.tip}>{t('camera.tip3')}</Text>
+          <Text style={styles.tip}>{t('camera.tip4')}</Text>
         </View>
 
         {/* Analyze button */}
         {pages.length > 0 && (
           <TouchableOpacity style={styles.btn} onPress={handleDone}>
-            <Text style={styles.btnText}>
-              Extract text from {pages.length} page{pages.length !== 1 ? 's' : ''} →
-            </Text>
+            <Text style={styles.btnText}>{t('camera.extract', { count: pages.length })}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -215,7 +232,17 @@ const styles = StyleSheet.create({
   back: { marginBottom: 16 },
   backText: { fontSize: 15, color: '#555' },
   title: { fontSize: 24, fontWeight: '700', color: '#111', marginBottom: 8 },
-  subtitle: { fontSize: 15, color: '#666', lineHeight: 22, marginBottom: 24 },
+  subtitle: { fontSize: 15, color: '#666', lineHeight: 22, marginBottom: 20 },
+  langLabel: { fontSize: 12, fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8 },
+  langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 6 },
+  langChip: {
+    paddingVertical: 7, paddingHorizontal: 12, borderRadius: 999,
+    borderWidth: 1.5, borderColor: '#e5e5e5', backgroundColor: '#fafafa',
+  },
+  langChipActive: { borderColor: '#111', backgroundColor: '#111' },
+  langChipText: { fontSize: 13, color: '#333', fontWeight: '500' },
+  langChipTextActive: { color: '#fff' },
+  langHint: { fontSize: 12, color: '#999', marginBottom: 22 },
   actions: { flexDirection: 'row', gap: 12, marginBottom: 28 },
   actionBtn: {
     flex: 1, backgroundColor: '#f5f5f5', borderRadius: 12,

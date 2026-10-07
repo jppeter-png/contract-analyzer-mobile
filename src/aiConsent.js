@@ -1,6 +1,7 @@
 import { Alert, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BASE_URL } from './api';
+import { t } from './i18n';
 
 const KEY = 'contract_analyzer_ai_consent';
 
@@ -38,12 +39,12 @@ export async function requestAiConsent() {
 
   return new Promise((resolve) => {
     Alert.alert(
-      'Send to Groq for AI analysis?',
-      'To analyze your document, the redacted text and the document type you chose will be sent to Groq, a third-party AI service. Emails, phone numbers, SSNs and similar identifiers are removed first, and names where detected.\n\nAutomatic redaction can miss details, including names, so check the preview first. Your original file or photo is never sent to Groq.',
+      t('consent.title'),
+      t('consent.message'),
       [
-        { text: 'Privacy Policy', onPress: () => { openPrivacyPolicy(); resolve(false); } },
-        { text: "Don't Allow", style: 'cancel', onPress: () => resolve(false) },
-        { text: 'Allow', onPress: async () => { await grantAiConsent(); resolve(true); } },
+        { text: t('consent.privacyPolicy'), onPress: () => { openPrivacyPolicy(); resolve(false); } },
+        { text: t('consent.dontAllow'), style: 'cancel', onPress: () => resolve(false) },
+        { text: t('consent.allow'), onPress: async () => { await grantAiConsent(); resolve(true); } },
       ],
       { cancelable: false }
     );
@@ -54,20 +55,20 @@ export async function requestAiConsent() {
 export async function showAiConsentSettings() {
   if (await hasAiConsent()) {
     Alert.alert(
-      'AI data sharing',
-      'You have allowed redacted document text to be sent to Groq, a third-party AI service, to generate analyses.\n\nIf you turn this off, nothing is sent and you will be asked again before your next analysis.',
+      t('consent.settingsTitle'),
+      t('consent.settingsOn'),
       [
-        { text: 'Close', style: 'cancel' },
-        { text: 'Turn Off', style: 'destructive', onPress: () => revokeAiConsent() },
+        { text: t('common.close'), style: 'cancel' },
+        { text: t('consent.turnOff'), style: 'destructive', onPress: () => revokeAiConsent() },
       ]
     );
   } else {
     Alert.alert(
-      'AI data sharing',
-      "Nothing is sent to Groq, a third-party AI service, until you allow it. You'll be asked before your first analysis.",
+      t('consent.settingsTitle'),
+      t('consent.settingsOff'),
       [
-        { text: 'OK', style: 'cancel' },
-        { text: 'Privacy Policy', onPress: openPrivacyPolicy },
+        { text: t('common.ok'), style: 'cancel' },
+        { text: t('consent.privacyPolicy'), onPress: openPrivacyPolicy },
       ]
     );
   }

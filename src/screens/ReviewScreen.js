@@ -6,16 +6,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
 import { preloadInterstitial } from '../ads';
 import { requestAiConsent } from '../aiConsent';
+import { t, findingLabel, displayFileName } from '../i18n';
 
-const CONTRACT_TYPES = [
-  { key: 'auto',       label: '🔍 Auto-detect',           desc: "Let AI figure it out" },
-  { key: 'employment', label: '💼 Employment',             desc: "Job offers, work agreements" },
-  { key: 'nda',        label: '🤫 NDA / Confidentiality',  desc: "Non-disclosure agreements" },
-  { key: 'lease',      label: '🏠 Lease / Real estate',    desc: "Rental and property documents" },
-  { key: 'service',    label: '🤝 Service agreement',      desc: "Freelance, vendor, consulting" },
-  { key: 'loan',       label: '💰 Loan / Finance',         desc: "Loans, credit, financing" },
-  { key: 'tos',        label: '📱 Terms of service',       desc: "ToS, privacy policies" },
-];
+const CONTRACT_TYPES = ['auto', 'employment', 'nda', 'lease', 'service', 'loan', 'tos'];
 
 export default function ReviewScreen({ navigation, route }) {
   const { scrubResult, fileName } = route.params;
@@ -49,18 +42,21 @@ export default function ReviewScreen({ navigation, route }) {
 
     const minutes = estimateMinutes(Math.ceil(scrubbedText.length / MAX_CHARS_PER_ANALYSIS));
     Alert.alert(
-      'This document is long',
-      `It's ${scrubbedText.length.toLocaleString()} characters — longer than the ${MAX_CHARS_PER_ANALYSIS.toLocaleString()}-character limit analyzed in a single pass. Later sections would be skipped unless you choose to process it in full.`,
+      t('review.long.title'),
+      t('review.long.message', {
+        length: scrubbedText.length.toLocaleString(),
+        limit: MAX_CHARS_PER_ANALYSIS.toLocaleString(),
+      }),
       [
         {
-          text: 'Process anyway (may miss later sections)',
+          text: t('review.long.anyway'),
           onPress: runNormalAnalysis,
         },
         {
-          text: `Process in full, ~${minutes} min (splits into sections)`,
+          text: t('review.long.full', { minutes }),
           onPress: runChunkedAnalysis,
         },
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
       ]
     );
   };
@@ -69,19 +65,19 @@ export default function ReviewScreen({ navigation, route }) {
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-          <Text style={styles.backText}>← Back</Text>
+          <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Privacy review</Text>
+        <Text style={styles.title}>{t('review.title')}</Text>
         <Text style={styles.meta}>
-          {fileName ? `"${fileName}" · ` : ''}{wordCount?.toLocaleString() ?? 0} words
+          {fileName ? `"${displayFileName(fileName)}" · ` : ''}{t('review.words', { count: wordCount ?? 0 })}
         </Text>
 
         {/* PII findings */}
         {totalRedacted > 0 ? (
           <View style={[styles.alert, styles.alertWarning]}>
             <Text style={[styles.alertTitle, styles.alertTitleWarning]}>
-              🛡 {totalRedacted} item{totalRedacted !== 1 ? 's' : ''} will be redacted
+              {t('review.redactedTitle', { count: totalRedacted })}
             </Text>
             {findings.map(({ label, count, redacted = [] }, i) => (
               <View key={label} style={styles.findingRow}>
@@ -90,7 +86,7 @@ export default function ReviewScreen({ navigation, route }) {
                   onPress={() => setExpandedIndex(expandedIndex === i ? null : i)}
                 >
                   <View style={styles.pill}>
-                    <Text style={styles.pillText}>{label} ×{count}</Text>
+                    <Text style={styles.pillText}>{findingLabel(label)} ×{count}</Text>
                   </View>
                   {redacted.length > 0 && (
                     <Text style={styles.expandHint}>{expandedIndex === i ? '▲' : '▼'}</Text>
@@ -108,14 +104,14 @@ export default function ReviewScreen({ navigation, route }) {
           </View>
         ) : (
           <View style={[styles.alert, styles.alertSuccess]}>
-            <Text style={[styles.alertTitle, styles.alertTitleSuccess]}>✅ No personal identifiers detected</Text>
+            <Text style={[styles.alertTitle, styles.alertTitleSuccess]}>{t('review.noPii')}</Text>
           </View>
         )}
 
         {/* Exactly what will be sent */}
         {!!preview && (
           <>
-            <Text style={styles.sectionLabel}>Text that will be sent</Text>
+            <Text style={styles.sectionLabel}>{t('review.sentLabel')}</Text>
             <View style={styles.previewBox}>
               <Text style={styles.previewText}>
                 {preview}{scrubbedText.length > preview.length ? '…' : ''}
@@ -125,31 +121,29 @@ export default function ReviewScreen({ navigation, route }) {
         )}
 
         {/* Document type selector */}
-        <Text style={styles.sectionLabel}>Document type</Text>
-        <Text style={styles.sectionDesc}>Choose a category for a more targeted analysis</Text>
+        <Text style={styles.sectionLabel}>{t('review.docType')}</Text>
+        <Text style={styles.sectionDesc}>{t('review.docTypeDesc')}</Text>
         <View style={styles.typeGrid}>
-          {CONTRACT_TYPES.map(({ key, label, desc }) => (
+          {CONTRACT_TYPES.map((key) => (
             <TouchableOpacity
               key={key}
               style={[styles.typeCard, selectedType === key && styles.typeCardSelected]}
               onPress={() => setSelectedType(key)}
             >
               <Text style={[styles.typeLabel, selectedType === key && styles.typeLabelSelected]}>
-                {label}
+                {t(`review.type.${key}`)}
               </Text>
               <Text style={[styles.typeDesc, selectedType === key && styles.typeDescSelected]}>
-                {desc}
+                {t(`review.type.${key}.desc`)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={styles.confirmNote}>
-          Only the redacted text is sent, to Groq, a third-party AI service, to generate your analysis. You'll be asked for permission first.
-        </Text>
+        <Text style={styles.confirmNote}>{t('review.confirmNote')}</Text>
 
         <TouchableOpacity style={styles.btn} onPress={handleAnalyze}>
-          <Text style={styles.btnText}>Analyze document</Text>
+          <Text style={styles.btnText}>{t('review.analyze')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
