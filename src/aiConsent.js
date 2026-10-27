@@ -1,6 +1,6 @@
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { BASE_URL } from './api';
+import { openLegalPage } from './legalPages';
 import { t } from './i18n';
 
 const KEY = 'contract_analyzer_ai_consent';
@@ -28,7 +28,7 @@ export async function revokeAiConsent() {
   await AsyncStorage.removeItem(KEY);
 }
 
-const openPrivacyPolicy = () => Linking.openURL(`${BASE_URL}/privacy`);
+const openPrivacyPolicy = () => openLegalPage('privacy');
 
 /**
  * Resolves true if the user has allowed (now or earlier) redacted document

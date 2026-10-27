@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import {
   View, Text, TouchableOpacity, TextInput, StyleSheet,
-  ScrollView, Alert, ActivityIndicator, Platform, Linking,
+  ScrollView, Alert, ActivityIndicator, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
-import { scrubDocument, scrubText, BASE_URL } from '../api';
+import { scrubDocument, scrubText } from '../api';
+import { openLegalPage } from '../legalPages';
 import { showAiConsentSettings } from '../aiConsent';
 import { t, getLanguage } from '../i18n';
 
@@ -272,7 +273,7 @@ export default function UploadScreen({ navigation }) {
           <Text style={styles.noticeIcon}>⚖️</Text>
           <Text style={styles.noticeText}>
             {t('upload.notice.legal')}{' '}
-            <Text style={styles.noticeLink} onPress={() => Linking.openURL(`${BASE_URL}/terms`)}>
+            <Text style={styles.noticeLink} onPress={() => openLegalPage('terms')}>
               {t('upload.notice.termsLink')}
             </Text>
           </Text>

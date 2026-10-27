@@ -8,6 +8,11 @@ export function pickLanguage(raw) {
   return SUPPORTED_LANGUAGES.includes(code) ? code : 'en';
 }
 
+/** Path of a legal page ('privacy', 'terms', 'support') on the server; English is the page without a language. */
+export function legalPath(page, language) {
+  return language && language !== 'en' && SUPPORTED_LANGUAGES.includes(language) ? `/${page}?lang=${language}` : `/${page}`;
+}
+
 /** Which plural form a count takes. French treats 0 and 1 as singular; Chinese has no plural. */
 export function pluralForm(language, count) {
   if (language === 'zh') return 'other';

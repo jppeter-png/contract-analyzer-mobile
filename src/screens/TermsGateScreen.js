@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BASE_URL } from '../api';
+import { openLegalPage } from '../legalPages';
 import { acceptCurrentTerms } from '../terms';
 import { t } from '../i18n';
 
@@ -23,7 +23,7 @@ export default function TermsGateScreen({ onAccept }) {
           <Text style={styles.body}>{t('terms.body2')}</Text>
         </View>
 
-        <TouchableOpacity onPress={() => Linking.openURL(`${BASE_URL}/terms`)}>
+        <TouchableOpacity onPress={() => openLegalPage('terms')}>
           <Text style={styles.link}>{t('terms.readFull')}</Text>
         </TouchableOpacity>
 
