@@ -57,7 +57,7 @@ export default function CameraScreen({ navigation }) {
 
     try {
       setStatusMsg(t('camera.ocrRunning', { count: pages.length }));
-      const { text, pageCount, wordCount } = await ocrImages(pages, documentLanguage);
+      const { text, confidence, lowestPageConfidence } = await ocrImages(pages, documentLanguage);
 
       if (!text.trim()) {
         Alert.alert(t('camera.noTextTitle'), t('camera.noTextMessage'));
@@ -68,7 +68,12 @@ export default function CameraScreen({ navigation }) {
       setStatusMsg(t('camera.scanning'));
       const scrubResult = await scrubText(text);
 
-      navigation.navigate('Review', { scrubResult });
+      // The review screen warns that this text came from photos, more strongly if they were hard to read.
+      navigation.navigate('Review', {
+        scrubResult,
+        fromPhotos: true,
+        ocrConfidence: [confidence, lowestPageConfidence].filter(Number.isFinite).reduce((a, b) => Math.min(a, b), 100),
+      });
     } catch (err) {
       Alert.alert(t('common.error'), err.response?.data?.error || err.message || t('camera.err.generic'));
     } finally {
@@ -203,6 +208,12 @@ export default function CameraScreen({ navigation }) {
           </View>
         )}
 
+        {/* Photo quality */}
+        <View style={styles.qualityBox}>
+          <Text style={styles.qualityTitle}>{t('camera.qualityTitle')}</Text>
+          <Text style={styles.qualityBody}>{t('camera.qualityBody')}</Text>
+        </View>
+
         {/* Tips */}
         <View style={styles.tips}>
           <Text style={styles.tipsTitle}>{t('camera.tipsTitle')}</Text>
@@ -275,6 +286,12 @@ const styles = StyleSheet.create({
   },
   thumbAddIcon: { fontSize: 24, color: '#aaa', marginBottom: 2 },
   thumbAddLabel: { fontSize: 11, color: '#aaa' },
+  qualityBox: {
+    backgroundColor: '#fffbeb', borderWidth: 1, borderColor: '#fde68a',
+    borderRadius: 10, padding: 14, marginBottom: 14,
+  },
+  qualityTitle: { fontSize: 14, fontWeight: '600', color: '#92400e', marginBottom: 6 },
+  qualityBody: { fontSize: 13, color: '#92400e', lineHeight: 19 },
   tips: { backgroundColor: '#f8f8f8', borderRadius: 10, padding: 14, marginBottom: 24 },
   tipsTitle: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 8 },
   tip: { fontSize: 13, color: '#666', lineHeight: 22 },

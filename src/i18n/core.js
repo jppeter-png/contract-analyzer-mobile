@@ -1,6 +1,6 @@
 // Pure translation logic (no React Native imports) so it can be tested in plain Node.
 
-export const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de', 'pt'];
+export const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de', 'pt', 'zh'];
 
 /** 'es-MX', 'pt_BR', 'fr' -> 'es' / 'pt' / 'fr'; anything unsupported -> 'en'. */
 export function pickLanguage(raw) {
@@ -8,8 +8,9 @@ export function pickLanguage(raw) {
   return SUPPORTED_LANGUAGES.includes(code) ? code : 'en';
 }
 
-/** Which plural form a count takes. French treats 0 and 1 as singular. */
+/** Which plural form a count takes. French treats 0 and 1 as singular; Chinese has no plural. */
 export function pluralForm(language, count) {
+  if (language === 'zh') return 'other';
   const n = Math.abs(Number(count));
   return (language === 'fr' ? n < 2 : n === 1) ? 'one' : 'other';
 }

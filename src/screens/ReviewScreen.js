@@ -8,10 +8,16 @@ import { preloadInterstitial } from '../ads';
 import { requestAiConsent } from '../aiConsent';
 import { t, findingLabel, displayFileName } from '../i18n';
 
+// Tesseract's own 0-100 score for how sure it was of the characters. It is only a rough signal
+// (clear errors can still score high), so the general notice always shows for photos and the
+// stronger one only appears when the score is clearly poor.
+const LOW_OCR_CONFIDENCE = 70;
+
 const CONTRACT_TYPES = ['auto', 'employment', 'nda', 'lease', 'service', 'loan', 'tos'];
 
 export default function ReviewScreen({ navigation, route }) {
-  const { scrubResult, fileName } = route.params;
+  const { scrubResult, fileName, fromPhotos = false, ocrConfidence = 100 } = route.params;
+  const hardToRead = fromPhotos && ocrConfidence < LOW_OCR_CONFIDENCE;
   const { scrubbedText, findings = [], wordCount, totalRedacted, preview } = scrubResult;
 
   const [selectedType, setSelectedType] = useState('auto');
@@ -108,6 +114,15 @@ export default function ReviewScreen({ navigation, route }) {
           </View>
         )}
 
+        {/* Text read from photos can contain recognition mistakes */}
+        {fromPhotos && (
+          <View style={[styles.photoNote, hardToRead && styles.photoNoteStrong]}>
+            <Text style={[styles.photoNoteText, hardToRead && styles.photoNoteTextStrong]}>
+              {hardToRead ? t('review.photoLowConfidence') : t('review.photoNote')}
+            </Text>
+          </View>
+        )}
+
         {/* Exactly what will be sent */}
         {!!preview && (
           <>
@@ -178,6 +193,13 @@ const styles = StyleSheet.create({
   redactedItem: { fontSize: 12, color: '#444', marginBottom: 3, fontFamily: 'monospace' },
   sectionLabel: { fontSize: 12, fontWeight: '600', color: '#888', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 },
   sectionDesc: { fontSize: 13, color: '#aaa', marginBottom: 12 },
+  photoNote: {
+    backgroundColor: '#f8f8f8', borderRadius: 10, padding: 12,
+    borderWidth: 1, borderColor: '#e5e5e5', marginBottom: 14,
+  },
+  photoNoteStrong: { backgroundColor: '#fffbeb', borderColor: '#fcd34d' },
+  photoNoteText: { fontSize: 13, color: '#555', lineHeight: 19 },
+  photoNoteTextStrong: { color: '#92400e', fontWeight: '500' },
   previewBox: {
     backgroundColor: '#f8f8f8', borderRadius: 10, padding: 14,
     borderWidth: 1, borderColor: '#e5e5e5', marginBottom: 20,

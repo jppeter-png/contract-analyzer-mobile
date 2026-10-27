@@ -186,6 +186,10 @@ export default {
   'camera.err.generic': 'Une erreur s’est produite',
   'camera.permTitle': 'Accès à l’appareil photo requis',
   'camera.permMessage': 'Autorisez l’accès à l’appareil photo dans les Réglages pour photographier des documents.',
+  'camera.qualityTitle': '📷 La qualité de la photo compte',
+  'camera.qualityBody': 'La reconnaissance de texte fonctionne mieux sur des pages nettes, bien éclairées et bien à plat. Un texte flou, sombre, de travers ou manuscrit peut être mal lu, ce qui peut fausser votre analyse. Vérifiez le texte sur l’écran suivant.',
+  'review.photoNote': 'Ce texte a été lu à partir de photos et peut contenir des erreurs. Lisez l’aperçu ci-dessous et, si une page est peu lisible, revenez en arrière pour la reprendre afin d’obtenir une meilleure analyse.',
+  'review.photoLowConfidence': 'Ces photos étaient difficiles à lire : le texte ci-dessous contient probablement des erreurs. Reprenez les pages avec une bonne lumière, bien à plat et nettes.',
   'camera.close': '✕ Fermer',
   'camera.captured_one': '{count} page capturée',
   'camera.captured_other': '{count} pages capturées',
@@ -201,6 +205,7 @@ export default {
   'lang.fr': 'Français',
   'lang.de': 'Deutsch',
   'lang.pt': 'Português',
+  'lang.zh': '简体中文',
 
   'finding.Email addresses': 'Adresses e-mail',
   'finding.Social Security Numbers': 'Numéros de sécurité sociale',

@@ -11,6 +11,7 @@ const FIRST_RUN_HEADING = [
   'Choisissez votre langue',
   'Wählen Sie Ihre Sprache',
   'Escolha o idioma',
+  '请选择语言',
 ];
 
 /**

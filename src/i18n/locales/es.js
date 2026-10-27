@@ -186,6 +186,10 @@ export default {
   'camera.err.generic': 'Algo salió mal',
   'camera.permTitle': 'Se necesita acceso a la cámara',
   'camera.permMessage': 'Permite el acceso a la cámara en Ajustes para fotografiar documentos.',
+  'camera.qualityTitle': '📷 La calidad de la foto importa',
+  'camera.qualityBody': 'El reconocimiento de texto funciona mejor con páginas nítidas, bien iluminadas y planas. El texto borroso, oscuro, torcido o manuscrito puede leerse mal, y eso puede afectar al análisis. Revisa el texto en la pantalla siguiente.',
+  'review.photoNote': 'Este texto se leyó a partir de fotos y puede contener errores. Lee la vista previa y, si alguna página no se ve bien, vuelve atrás y repite la foto para obtener un mejor análisis.',
+  'review.photoLowConfidence': 'Estas fotos eran difíciles de leer, así que el texto de abajo probablemente tiene errores. Repite las páginas con buena luz, planas y enfocadas.',
   'camera.close': '✕ Cerrar',
   'camera.captured_one': '{count} página capturada',
   'camera.captured_other': '{count} páginas capturadas',
@@ -201,6 +205,7 @@ export default {
   'lang.fr': 'Français',
   'lang.de': 'Deutsch',
   'lang.pt': 'Português',
+  'lang.zh': '简体中文',
 
   'finding.Email addresses': 'Correos electrónicos',
   'finding.Social Security Numbers': 'Números de seguridad social',

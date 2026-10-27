@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.join(__dirname, '..');
-const LANGS = ['en', 'es', 'fr', 'de', 'pt'];
+const LANGS = ['en', 'es', 'fr', 'de', 'pt', 'zh'];
 
 const load = lang => {
   const src = fs.readFileSync(path.join(root, 'src/i18n/locales', `${lang}.js`), 'utf8');

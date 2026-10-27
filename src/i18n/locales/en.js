@@ -199,6 +199,10 @@ export default {
   'camera.err.generic': 'Something went wrong',
   'camera.permTitle': 'Camera access needed',
   'camera.permMessage': 'Please allow camera access in Settings to take photos of documents.',
+  'camera.qualityTitle': '📷 Photo quality matters',
+  'camera.qualityBody': 'Text recognition works best on sharp, evenly lit, flat pages. Blurry, dark, angled or handwritten text may be read wrongly, and that can affect your analysis. Check the text on the next screen.',
+  'review.photoNote': 'This text was read from photos and may contain mistakes. Read the preview below, and go back to retake any unclear page for a better analysis.',
+  'review.photoLowConfidence': 'These photos were hard to read, so the text below probably contains errors. Retake the pages in good light, flat and in focus.',
   'camera.close': '✕ Close',
   'camera.captured_one': '{count} page captured',
   'camera.captured_other': '{count} pages captured',
@@ -215,6 +219,7 @@ export default {
   'lang.fr': 'Français',
   'lang.de': 'Deutsch',
   'lang.pt': 'Português',
+  'lang.zh': '简体中文',
 
   // ── Labels of redacted items, as reported by the server ───────────────
   'finding.Email addresses': 'Email addresses',

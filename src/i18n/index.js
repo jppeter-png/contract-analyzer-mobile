@@ -5,8 +5,9 @@ import es from './locales/es';
 import fr from './locales/fr';
 import de from './locales/de';
 import pt from './locales/pt';
+import zh from './locales/zh';
 
-const CATALOGS = { en, es, fr, de, pt };
+const CATALOGS = { en, es, fr, de, pt, zh };
 const KEY = 'contract_analyzer_language';
 
 // The language is chosen by the user (first launch, then Language on the main screen),

@@ -186,6 +186,10 @@ export default {
   'camera.err.generic': 'Etwas ist schiefgelaufen',
   'camera.permTitle': 'Kamerazugriff erforderlich',
   'camera.permMessage': 'Erlauben Sie den Kamerazugriff in den Einstellungen, um Dokumente zu fotografieren.',
+  'camera.qualityTitle': '📷 Die Fotoqualität zählt',
+  'camera.qualityBody': 'Die Texterkennung funktioniert am besten bei scharfen, gleichmäßig beleuchteten, flachen Seiten. Unscharfer, dunkler, schiefer oder handgeschriebener Text wird möglicherweise falsch gelesen, was die Analyse beeinträchtigen kann. Prüfen Sie den Text auf dem nächsten Bildschirm.',
+  'review.photoNote': 'Dieser Text wurde aus Fotos gelesen und kann Fehler enthalten. Lesen Sie die Vorschau, und gehen Sie zurück, um undeutliche Seiten neu aufzunehmen – für eine bessere Analyse.',
+  'review.photoLowConfidence': 'Diese Fotos waren schwer lesbar, daher enthält der Text unten wahrscheinlich Fehler. Nehmen Sie die Seiten bei gutem Licht, flach und scharf neu auf.',
   'camera.close': '✕ Schließen',
   'camera.captured_one': '{count} Seite aufgenommen',
   'camera.captured_other': '{count} Seiten aufgenommen',
@@ -201,6 +205,7 @@ export default {
   'lang.fr': 'Français',
   'lang.de': 'Deutsch',
   'lang.pt': 'Português',
+  'lang.zh': '简体中文',
 
   'finding.Email addresses': 'E-Mail-Adressen',
   'finding.Social Security Numbers': 'Sozialversicherungsnummern',
