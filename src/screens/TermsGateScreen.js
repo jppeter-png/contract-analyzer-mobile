@@ -5,6 +5,9 @@ import { openLegalPage } from '../legalPages';
 import { acceptCurrentTerms } from '../terms';
 import { t } from '../i18n';
 
+// Who had the idea for the app.
+const IDEA_BY = 'Chrystal Ding';
+
 export default function TermsGateScreen({ onAccept }) {
   const [checked, setChecked] = useState(false);
 
@@ -45,6 +48,8 @@ export default function TermsGateScreen({ onAccept }) {
         >
           <Text style={styles.continueBtnText}>{t('terms.continue')}</Text>
         </TouchableOpacity>
+
+        <Text style={styles.credit}>{t('terms.credit', { name: IDEA_BY })}</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -70,4 +75,5 @@ const styles = StyleSheet.create({
   continueBtn: { backgroundColor: '#111', borderRadius: 10, paddingVertical: 16, alignItems: 'center' },
   continueBtnDisabled: { backgroundColor: '#ccc' },
   continueBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  credit: { fontSize: 12, color: '#aaa', textAlign: 'center', marginTop: 28 },
 });

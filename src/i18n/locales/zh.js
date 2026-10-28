@@ -233,4 +233,5 @@ export default {
   'finding.Social media handles': '社交媒体账号',
   'finding.EIN / Tax IDs': '税号 (EIN)',
   'finding.Person names': '人名',
+  'terms.credit': "最初创意：{name}",
 };

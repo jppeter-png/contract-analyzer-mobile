@@ -232,4 +232,5 @@ export default {
   'finding.Social media handles': 'Identifiants de réseaux sociaux',
   'finding.EIN / Tax IDs': 'Numéros fiscaux (EIN)',
   'finding.Person names': 'Noms de personnes',
+  'terms.credit': "Idée originale de {name}",
 };

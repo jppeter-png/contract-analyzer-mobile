@@ -247,4 +247,5 @@ export default {
   'finding.Social media handles': 'Social media handles',
   'finding.EIN / Tax IDs': 'EIN / Tax IDs',
   'finding.Person names': 'Person names',
+  'terms.credit': "Original idea by {name}",
 };
