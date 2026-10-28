@@ -8,7 +8,7 @@ import { showInterstitial } from '../ads';
 import { t } from '../i18n';
 
 export default function ChunkedAnalyzingScreen({ navigation, route }) {
-  const { chunks, contractType, fileName, findings, totalRedacted } = route.params;
+  const { chunks, contractType, fileName, findings, totalRedacted, source = null } = route.params;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [sectionProgress, setSectionProgress] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(null);
@@ -77,7 +77,8 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
 
       if (cancelledRef.current) return;
 
-      const merged = mergeAnalyses(results);
+      const combined = mergeAnalyses(results);
+      const merged = source ? { ...combined, source } : combined;
       saveAnalysis({ fileName, analysis: merged, findings, totalRedacted });
       navigation.replace('Results', { analysis: merged, findings, totalRedacted, fileName });
     }

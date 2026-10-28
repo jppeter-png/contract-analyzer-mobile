@@ -6,7 +6,8 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "check:i18n": "node scripts/check-i18n.js"
+    "check:i18n": "node scripts/check-i18n.js",
+    "check:coverage": "node scripts/check-coverage.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

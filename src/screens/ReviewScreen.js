@@ -6,12 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
 import { preloadInterstitial } from '../ads';
 import { requestAiConsent } from '../aiConsent';
+import { LOW_OCR_CONFIDENCE, sourceInfo } from '../coverage';
 import { t, findingLabel, displayFileName } from '../i18n';
-
-// Tesseract's own 0-100 score for how sure it was of the characters. It is only a rough signal
-// (clear errors can still score high), so the general notice always shows for photos and the
-// stronger one only appears when the score is clearly poor.
-const LOW_OCR_CONFIDENCE = 70;
 
 const CONTRACT_TYPES = ['auto', 'employment', 'nda', 'lease', 'service', 'loan', 'tos'];
 
@@ -30,12 +26,16 @@ export default function ReviewScreen({ navigation, route }) {
   const runNormalAnalysis = () => {
     navigation.navigate('Analyzing', {
       scrubbedText, contractType: selectedType, fileName, findings, totalRedacted,
+      source: sourceInfo(fromPhotos, ocrConfidence),
     });
   };
 
   const runChunkedAnalysis = () => {
     const chunks = chunkText(scrubbedText, MAX_CHARS_PER_ANALYSIS);
-    navigation.navigate('ChunkedAnalyzing', { chunks, contractType: selectedType, fileName, findings, totalRedacted });
+    navigation.navigate('ChunkedAnalyzing', {
+      chunks, contractType: selectedType, fileName, findings, totalRedacted,
+      source: sourceInfo(fromPhotos, ocrConfidence),
+    });
   };
 
   const handleAnalyze = async () => {

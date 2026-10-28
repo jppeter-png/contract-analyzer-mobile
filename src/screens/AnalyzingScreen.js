@@ -9,7 +9,7 @@ import { t } from '../i18n';
 const STEP_KEYS = ['analyzing.step1', 'analyzing.step2', 'analyzing.step3'];
 
 export default function AnalyzingScreen({ navigation, route }) {
-  const { scrubbedText, contractType, fileName, findings, totalRedacted } = route.params;
+  const { scrubbedText, contractType, fileName, findings, totalRedacted, source = null } = route.params;
   const [stepIndex, setStepIndex] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -32,10 +32,11 @@ export default function AnalyzingScreen({ navigation, route }) {
         // Runs the ad alongside the real analysis call, not before it — masks
         // the wait instead of adding to it. If the ad isn't loaded in time,
         // showInterstitial() resolves immediately rather than blocking.
-        const [analysis] = await Promise.all([
+        const [result] = await Promise.all([
           analyzeContract(scrubbedText, contractType, null, controller.signal),
           showInterstitial(),
         ]);
+        const analysis = source ? { ...result, source } : result;
         setProgress(1);
         saveAnalysis({ fileName, analysis, findings, totalRedacted });
         setTimeout(() => {

@@ -1,4 +1,5 @@
 import { t } from './i18n';
+import { reportedInEverySection } from './coverage';
 
 // Must match backend/src/routes/analyze.js's MAX_INPUT_CHARS.
 export const MAX_CHARS_PER_ANALYSIS = 8000;
@@ -70,13 +71,18 @@ export function mergeAnalyses(analyses) {
   const summary = t('chunked.merged', { count: analyses.length })
     + analyses.map((a, i) => t('chunked.sectionLabel', { number: i + 1, summary: a.summary })).join(' ');
 
-  const issues = analyses.flatMap((a, i) =>
-    (a.issues || []).map(issue => ({ ...issue, section: i + 1 }))
+  // Each section only sees its own part of the document, so a protection counts as missing
+  // only when every section reports it absent (see reportedInEverySection).
+  const clauseIssues = analyses.flatMap((a, i) =>
+    (a.issues || []).filter(issue => issue.type !== 'missing_protection').map(issue => ({ ...issue, section: i + 1 }))
   );
+  const missingIssues = analyses.map(a => (a.issues || []).filter(issue => issue.type === 'missing_protection'));
+  const commonIssues = reportedInEverySection(missingIssues.map(list => list.map(issue => issue.title)))
+    .map(index => missingIssues[0][index]);
+  const issues = [...clauseIssues, ...commonIssues];
 
-  const missing_protections = [...new Set(
-    analyses.flatMap(a => a.missing_protections || [])
-  )];
+  const protections = analyses.map(a => a.missing_protections || []);
+  const missing_protections = reportedInEverySection(protections).map(index => protections[0][index]);
 
-  return { overall_risk, category, summary, issues, missing_protections, truncated: false, chunked: true };
+  return { overall_risk, category, summary, issues, missing_protections, truncated: false, chunked: true, sections: analyses.length };
 }
