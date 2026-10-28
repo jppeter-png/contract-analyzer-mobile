@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert,
 } from 'react-native';
@@ -7,6 +7,7 @@ import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisC
 import { preloadInterstitial } from '../ads';
 import { requestAiConsent } from '../aiConsent';
 import { LOW_OCR_CONFIDENCE, sourceInfo } from '../coverage';
+import { splitSegments, redactionStarts, passageAround } from '../redactionPreview';
 import { t, findingLabel, displayFileName } from '../i18n';
 
 const CONTRACT_TYPES = ['auto', 'employment', 'nda', 'lease', 'service', 'loan', 'tos'];
@@ -14,10 +15,24 @@ const CONTRACT_TYPES = ['auto', 'employment', 'nda', 'lease', 'service', 'loan',
 export default function ReviewScreen({ navigation, route }) {
   const { scrubResult, fileName, fromPhotos = false, ocrConfidence = 100 } = route.params;
   const hardToRead = fromPhotos && ocrConfidence < LOW_OCR_CONFIDENCE;
-  const { scrubbedText, findings = [], wordCount, totalRedacted, preview } = scrubResult;
+  const { scrubbedText, findings = [], wordCount, totalRedacted } = scrubResult;
 
   const [selectedType, setSelectedType] = useState('auto');
   const [expandedIndex, setExpandedIndex] = useState(null);
+
+  // The preview opens at the first redaction (not the top of the document, where there may be none),
+  // can jump between them, and can show the whole text that will be sent.
+  const [showFull, setShowFull] = useState(false);
+  const [focus, setFocus] = useState(0);
+  const starts = useMemo(() => redactionStarts(scrubbedText || ''), [scrubbedText]);
+  const passage = useMemo(
+    () => (showFull ? null : passageAround(scrubbedText || '', starts[focus] ?? 0)),
+    [showFull, focus, starts, scrubbedText],
+  );
+  const segments = useMemo(
+    () => splitSegments(showFull ? scrubbedText : passage.text),
+    [showFull, scrubbedText, passage],
+  );
 
   useEffect(() => {
     preloadInterstitial(); // so it's likely ready by the time the user taps Analyze
@@ -124,13 +139,29 @@ export default function ReviewScreen({ navigation, route }) {
         )}
 
         {/* Exactly what will be sent */}
-        {!!preview && (
+        {!!scrubbedText && (
           <>
             <Text style={styles.sectionLabel}>{t('review.sentLabel')}</Text>
             <View style={styles.previewBox}>
               <Text style={styles.previewText}>
-                {preview}{scrubbedText.length > preview.length ? '…' : ''}
+                {!showFull && passage.cutBefore ? '… ' : ''}
+                {segments.map((segment, i) => (segment.redacted
+                  ? <Text key={i} style={styles.redactionChip}>{segment.text}</Text>
+                  : segment.text))}
+                {!showFull && passage.cutAfter ? ' …' : ''}
               </Text>
+            </View>
+            <View style={styles.previewActions}>
+              <TouchableOpacity onPress={() => setShowFull(v => !v)}>
+                <Text style={styles.previewLink}>{showFull ? t('review.showLess') : t('review.showFull')}</Text>
+              </TouchableOpacity>
+              {!showFull && starts.length > 1 && (
+                <TouchableOpacity onPress={() => setFocus(f => (f + 1) % starts.length)}>
+                  <Text style={styles.previewLink}>
+                    {t('review.nextRedaction', { current: focus + 1, total: starts.length })}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </>
         )}
@@ -205,6 +236,9 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#e5e5e5', marginBottom: 20,
   },
   previewText: { fontSize: 12, color: '#555', lineHeight: 19, fontFamily: 'monospace' },
+  redactionChip: { backgroundColor: '#111', color: '#fff', fontWeight: '700' },
+  previewActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, marginBottom: 20 },
+  previewLink: { fontSize: 13, color: '#2f6fd0', fontWeight: '500' },
   typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   typeCard: {
     width: '48%', padding: 12, borderRadius: 10,

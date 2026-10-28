@@ -249,4 +249,7 @@ export default {
   'finding.Person names': 'Person names',
   'terms.credit': "Original idea by {name}",
   'analyzing.busy': "The AI service is busy right now. Please wait a minute and try again.",
+  'review.showFull': "Show full text",
+  'review.showLess': "Show less",
+  'review.nextRedaction': "Next redaction ({current}/{total})",
 };

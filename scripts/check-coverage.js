@@ -10,6 +10,7 @@ const strip = src => src.replace(/^import .*$/gm, '').replace(/^export /gm, '');
 const coverage = new Function(`${strip(read('coverage.js'))}; return { LOW_OCR_CONFIDENCE, sourceInfo, similarText, reportedInEverySection };`)();
 const { sourceInfo, similarText, reportedInEverySection } = coverage;
 const { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES } = new Function(`${strip(read('rateLimit.js'))}; return { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES };`)();
+const { splitSegments, redactionStarts, passageAround } = new Function(`${strip(read('redactionPreview.js'))}; return { splitSegments, redactionStarts, passageAround };`)();
 const chunking = new Function('t', 'reportedInEverySection',
   `${strip(read('analysisChunking.js'))}; return { mergeAnalyses };`)((key, vars) => `${key}:${JSON.stringify(vars || {})}`, reportedInEverySection);
 
@@ -76,6 +77,39 @@ test('the wait follows the server hint, kept between 5 and 90 seconds', () => {
   assert.strictEqual(retryAfterSeconds({ response: {} }), 30);
   assert.strictEqual(retryAfterSeconds({}, 12), 12);
   assert(MAX_BUSY_RETRIES >= 1);
+});
+
+test('placeholders are picked out of the redacted text, numbered or not', () => {
+  const text = 'Landlord [NAME 1] and [NAME 2] sign. Write to [EMAIL] or [PHONE 2]. Keep [brackets] and [A] as they are.';
+  const tags = splitSegments(text).filter(s => s.redacted).map(s => s.text);
+  assert.deepStrictEqual(tags, ['[NAME 1]', '[NAME 2]', '[EMAIL]', '[PHONE 2]']);
+  assert.strictEqual(splitSegments(text).map(s => s.text).join(''), text);
+  assert.strictEqual(redactionStarts(text).length, 4);
+  assert.deepStrictEqual(splitSegments('no redactions here'), [{ text: 'no redactions here', redacted: false }]);
+});
+
+test('the preview passage starts near the first redaction, not at the top of the document', () => {
+  const filler = 'Lorem ipsum dolor sit amet consectetur. '.repeat(60);
+  const text = `Title\n\n${filler}\n\nSigned by [NAME 1] on the date above. ${filler}`;
+  const at = redactionStarts(text)[0];
+  const p = passageAround(text, at, 800);
+  assert(p.text.includes('[NAME 1]'));
+  assert(p.text.startsWith('Signed by'), `starts at the paragraph: ${p.text.slice(0, 30)}`);
+  assert.strictEqual(p.cutBefore, true);
+  assert.strictEqual(p.cutAfter, true);
+  assert(p.text.length <= 800);
+});
+
+test('a long paragraph is entered a little before the redaction, on a word boundary', () => {
+  const text = `${'alpha beta gamma delta '.repeat(100)}[EMAIL] ${'epsilon zeta '.repeat(100)}`;
+  const p = passageAround(text, redactionStarts(text)[0], 600);
+  assert(p.text.includes('[EMAIL]'));
+  assert(/^[a-z]+ /.test(p.text), 'does not begin mid-word');
+});
+
+test('short documents come back whole', () => {
+  const p = passageAround('Tenant [NAME] pays rent.', 7, 1200);
+  assert.deepStrictEqual(p, { text: 'Tenant [NAME] pays rent.', cutBefore: false, cutAfter: false });
 });
 
 console.log(`coverage OK: ${checks} checks`);

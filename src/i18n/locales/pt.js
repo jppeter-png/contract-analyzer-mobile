@@ -234,4 +234,7 @@ export default {
   'finding.Person names': 'Nomes de pessoas',
   'terms.credit': "Ideia original de {name}",
   'analyzing.busy': "O serviço de IA está ocupado no momento. Aguarde um minuto e tente novamente.",
+  'review.showFull': "Mostrar o texto completo",
+  'review.showLess': "Mostrar menos",
+  'review.nextRedaction': "Próximo trecho oculto ({current}/{total})",
 };

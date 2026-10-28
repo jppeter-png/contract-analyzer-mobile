@@ -235,4 +235,7 @@ export default {
   'finding.Person names': '人名',
   'terms.credit': "最初创意：{name}",
   'analyzing.busy': "AI 服务目前繁忙。请等待一分钟后重试。",
+  'review.showFull': "显示全文",
+  'review.showLess': "收起",
+  'review.nextRedaction': "下一处隐去内容（{current}/{total}）",
 };
