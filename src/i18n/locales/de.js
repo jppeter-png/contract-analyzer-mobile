@@ -26,7 +26,7 @@ export default {
   'consent.settingsOff': 'Es wird nichts an Groq, einen KI-Dienst eines Drittanbieters, gesendet, bevor Sie es erlauben. Sie werden vor Ihrer ersten Analyse gefragt.',
   'consent.turnOff': 'Ausschalten',
 
-  'upload.subtitle': 'Laden Sie ein Dokument hoch, fügen Sie es ein oder fotografieren Sie es. Gängige persönliche Kennungen werden vor jeder KI-Analyse geschwärzt.',
+  'upload.subtitle': "Laden Sie ein Dokument hoch, fügen Sie es ein oder fotografieren Sie es. Namen, Nummern und Adressen werden geschwärzt, bevor irgendetwas an die KI geht, und Sie prüfen zuerst genau, was geschwärzt wurde.",
   'upload.scanning': '🔒 Suche nach persönlichen Daten – bei längeren Dateien kann das etwas dauern.',
   'upload.tab.file': 'Datei',
   'upload.tab.paste': 'Text',

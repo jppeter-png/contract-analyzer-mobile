@@ -26,7 +26,7 @@ export default {
   'consent.settingsOff': 'Rien n’est envoyé à Groq, un service d’IA tiers, tant que vous ne l’autorisez pas. L’autorisation vous sera demandée avant votre première analyse.',
   'consent.turnOff': 'Désactiver',
 
-  'upload.subtitle': 'Importez, collez ou photographiez un document. Les identifiants personnels courants sont masqués avant toute analyse par IA.',
+  'upload.subtitle': "Importez, collez ou photographiez un document. Les noms, numéros et adresses sont masqués avant que quoi que ce soit n’arrive à l’IA, et vous vérifiez d’abord exactement ce qui a été masqué.",
   'upload.scanning': '🔒 Recherche d’informations personnelles — cela peut prendre un moment pour les fichiers longs.',
   'upload.tab.file': 'Fichier',
   'upload.tab.paste': 'Texte',

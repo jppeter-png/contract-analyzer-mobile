@@ -33,7 +33,7 @@ export default {
   'consent.turnOff': 'Turn Off',
 
   // ── Upload screen ─────────────────────────────────────────────────────
-  'upload.subtitle': 'Upload, paste, or photograph a document. Common personal identifiers are redacted before any AI analysis.',
+  'upload.subtitle': "Upload, paste, or photograph a document. Names, numbers and addresses are removed before anything goes to the AI, and you review exactly what was removed first.",
   'upload.scanning': '🔒 Scanning for personal information — this can take a bit for longer files.',
   'upload.tab.file': 'Upload file',
   'upload.tab.paste': 'Paste text',

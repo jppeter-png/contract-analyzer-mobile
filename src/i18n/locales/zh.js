@@ -27,7 +27,7 @@ export default {
   'consent.settingsOff': '在您允许之前，不会向 Groq（一项第三方 AI 服务）发送任何内容。首次分析之前会征求您的同意。',
   'consent.turnOff': '关闭',
 
-  'upload.subtitle': '上传、粘贴或拍摄文档。常见的个人标识符会在任何 AI 分析之前被隐去。',
+  'upload.subtitle': "上传、粘贴或拍摄文档。姓名、号码和地址会在任何内容交给 AI 之前被隐去，并且您会先确切看到被隐去的内容。",
   'upload.scanning': '🔒 正在查找个人信息——较长的文件可能需要一些时间。',
   'upload.tab.file': '文件',
   'upload.tab.paste': '文本',

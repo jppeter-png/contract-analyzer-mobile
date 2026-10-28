@@ -26,7 +26,7 @@ export default {
   'consent.settingsOff': 'No se envía nada a Groq, un servicio de IA de terceros, hasta que lo permitas. Se te preguntará antes de tu primer análisis.',
   'consent.turnOff': 'Desactivar',
 
-  'upload.subtitle': 'Sube, pega o fotografía un documento. Los identificadores personales habituales se ocultan antes de cualquier análisis con IA.',
+  'upload.subtitle': "Sube, pega o fotografía un documento. Los nombres, números y direcciones se ocultan antes de que nada llegue a la IA, y tú revisas primero exactamente lo que se ocultó.",
   'upload.scanning': '🔒 Buscando información personal: puede tardar un poco con archivos largos.',
   'upload.tab.file': 'Archivo',
   'upload.tab.paste': 'Texto',
