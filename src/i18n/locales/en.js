@@ -248,4 +248,5 @@ export default {
   'finding.EIN / Tax IDs': 'EIN / Tax IDs',
   'finding.Person names': 'Person names',
   'terms.credit': "Original idea by {name}",
+  'analyzing.busy': "The AI service is busy right now. Please wait a minute and try again.",
 };

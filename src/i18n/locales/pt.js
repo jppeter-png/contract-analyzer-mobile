@@ -233,4 +233,5 @@ export default {
   'finding.EIN / Tax IDs': 'Números fiscais (EIN)',
   'finding.Person names': 'Nomes de pessoas',
   'terms.credit': "Ideia original de {name}",
+  'analyzing.busy': "O serviço de IA está ocupado no momento. Aguarde um minuto e tente novamente.",
 };

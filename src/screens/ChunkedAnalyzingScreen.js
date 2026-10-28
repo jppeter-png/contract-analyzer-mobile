@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
 import { mergeAnalyses, CHUNK_INTERVAL_MS } from '../analysisChunking';
+import { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES } from '../rateLimit';
 import { saveAnalysis } from '../history';
 import { showInterstitial } from '../ads';
 import { t } from '../i18n';
@@ -16,6 +17,20 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
 
   useEffect(() => {
     let countdownTimer;
+
+    // Counts down on screen (the same line used between sections) and resolves when the wait is over.
+    const waitSeconds = seconds => new Promise(resolve => {
+      let remaining = seconds;
+      setSecondsLeft(remaining);
+      countdownTimer = setInterval(() => {
+        remaining -= 1;
+        setSecondsLeft(Math.max(0, remaining));
+        if (remaining <= 0 || cancelledRef.current) {
+          clearInterval(countdownTimer);
+          resolve();
+        }
+      }, 1000);
+    });
 
     async function run() {
       const results = [];
@@ -33,13 +48,25 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
         }, 300);
 
         try {
-          // Only shown once, alongside the first section — masks that wait
-          // rather than adding one, and firing it once per chunk would just
-          // be annoying (and risk AdMob flagging it as excessive ad load).
-          const [analysis] = await Promise.all([
-            analyzeContract(chunks[i], contractType, { index: i + 1, total: chunks.length }),
-            i === 0 ? showInterstitial() : Promise.resolve(),
-          ]);
+          // If the AI service is busy, wait as long as it asks and try this section again,
+          // so the sections already done aren't thrown away.
+          let analysis;
+          for (let tries = 0; ; tries++) {
+            try {
+              // The ad is only shown once, alongside the first section's first try — masks that wait
+              // rather than adding one, and firing it once per chunk would just
+              // be annoying (and risk AdMob flagging it as excessive ad load).
+              [analysis] = await Promise.all([
+                analyzeContract(chunks[i], contractType, { index: i + 1, total: chunks.length }),
+                i === 0 && tries === 0 ? showInterstitial() : Promise.resolve(),
+              ]);
+              break;
+            } catch (err) {
+              if (!isBusy(err) || tries >= MAX_BUSY_RETRIES || cancelledRef.current) throw err;
+              await waitSeconds(retryAfterSeconds(err));
+              if (cancelledRef.current) return;
+            }
+          }
           results.push(analysis);
           setSectionProgress(1);
         } catch (err) {
@@ -48,7 +75,7 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
             t('analyzing.failed'),
             t('chunked.sectionFailed', {
               current: i + 1, total: chunks.length,
-              error: err.response?.data?.error || err.message || t('common.tryAgain'),
+              error: isBusy(err) ? t('analyzing.busy') : err.response?.data?.error || err.message || t('common.tryAgain'),
             })
           );
           navigation.goBack();

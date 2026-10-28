@@ -233,4 +233,5 @@ export default {
   'finding.EIN / Tax IDs': 'Steuernummern (EIN)',
   'finding.Person names': 'Personennamen',
   'terms.credit': "Originalidee von {name}",
+  'analyzing.busy': "Der KI-Dienst ist gerade ausgelastet. Bitte warten Sie eine Minute und versuchen Sie es erneut.",
 };

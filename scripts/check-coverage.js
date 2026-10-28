@@ -9,6 +9,7 @@ const strip = src => src.replace(/^import .*$/gm, '').replace(/^export /gm, '');
 
 const coverage = new Function(`${strip(read('coverage.js'))}; return { LOW_OCR_CONFIDENCE, sourceInfo, similarText, reportedInEverySection };`)();
 const { sourceInfo, similarText, reportedInEverySection } = coverage;
+const { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES } = new Function(`${strip(read('rateLimit.js'))}; return { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES };`)();
 const chunking = new Function('t', 'reportedInEverySection',
   `${strip(read('analysisChunking.js'))}; return { mergeAnalyses };`)((key, vars) => `${key}:${JSON.stringify(vars || {})}`, reportedInEverySection);
 
@@ -59,6 +60,22 @@ test('a missing-protection issue every section reports is kept', () => {
     { overall_risk: 'low', category: 'x', summary: 'B', issues: [missing('Liability cap is absent')], missing_protections: [] },
   ]);
   assert.deepStrictEqual(merged.issues.map(i => i.title), ['No cap on liability']);
+});
+
+test('a 429 is recognised as "AI service busy", other errors are not', () => {
+  assert.strictEqual(isBusy({ response: { status: 429 } }), true);
+  assert.strictEqual(isBusy({ response: { status: 500 } }), false);
+  assert.strictEqual(isBusy(new Error('network')), false);
+});
+
+test('the wait follows the server hint, kept between 5 and 90 seconds', () => {
+  assert.strictEqual(retryAfterSeconds({ response: { data: { retryAfter: 17 } } }), 17);
+  assert.strictEqual(retryAfterSeconds({ response: { data: { retryAfter: 1 } } }), 5);
+  assert.strictEqual(retryAfterSeconds({ response: { data: { retryAfter: 600 } } }), 90);
+  assert.strictEqual(retryAfterSeconds({ response: { headers: { 'retry-after': '25' } } }), 25);
+  assert.strictEqual(retryAfterSeconds({ response: {} }), 30);
+  assert.strictEqual(retryAfterSeconds({}, 12), 12);
+  assert(MAX_BUSY_RETRIES >= 1);
 });
 
 console.log(`coverage OK: ${checks} checks`);

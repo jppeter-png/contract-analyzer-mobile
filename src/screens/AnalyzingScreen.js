@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
+import { isBusy } from '../rateLimit';
 import { saveAnalysis } from '../history';
 import { showInterstitial } from '../ads';
 import { t } from '../i18n';
@@ -45,7 +46,7 @@ export default function AnalyzingScreen({ navigation, route }) {
       } catch (err) {
         if (controller.signal.aborted) return;
         navigation.goBack();
-        Alert.alert(t('analyzing.failed'), err.response?.data?.error || err.message || t('common.tryAgain'));
+        Alert.alert(t('analyzing.failed'), isBusy(err) ? t('analyzing.busy') : err.response?.data?.error || err.message || t('common.tryAgain'));
       }
     })();
 

@@ -234,4 +234,5 @@ export default {
   'finding.EIN / Tax IDs': '税号 (EIN)',
   'finding.Person names': '人名',
   'terms.credit': "最初创意：{name}",
+  'analyzing.busy': "AI 服务目前繁忙。请等待一分钟后重试。",
 };

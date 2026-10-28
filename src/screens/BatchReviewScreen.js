@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
+import { isBusy } from '../rateLimit';
 import { saveAnalysis } from '../history';
 import { chunkText, mergeAnalyses, estimateMinutes, MAX_CHARS_PER_ANALYSIS, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import RiskBadge from '../components/RiskBadge';
@@ -51,7 +52,7 @@ export default function BatchReviewScreen({ navigation, route }) {
           totalRedacted: item.scrubResult.totalRedacted || 0,
         });
       } catch (err) {
-        newAnalyses[i] = { error: err.response?.data?.error || err.message };
+        newAnalyses[i] = { error: isBusy(err) ? t('analyzing.busy') : err.response?.data?.error || err.message };
       }
     }
     setAnalyses(newAnalyses);
@@ -129,7 +130,7 @@ export default function BatchReviewScreen({ navigation, route }) {
         perFileChunks[step.fileIndex].push(analysis);
       } catch (err) {
         failedFiles.add(step.fileIndex);
-        newAnalyses[step.fileIndex] = { error: err.response?.data?.error || err.message };
+        newAnalyses[step.fileIndex] = { error: isBusy(err) ? t('analyzing.busy') : err.response?.data?.error || err.message };
       }
     }
 
