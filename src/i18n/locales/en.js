@@ -114,7 +114,7 @@ export default {
   'chunked.sectionLabel': 'Section {number}: {summary}',
 
   // ── Results ───────────────────────────────────────────────────────────
-  'results.truncated': "⚠ This document was long — only the first ~8,000 characters were analyzed. Later sections weren't reviewed.",
+  'results.truncated': "⚠ This document was long — only the first ~60,000 characters were analyzed. Later sections weren't reviewed.",
   'results.high': 'High',
   'results.medium': 'Medium',
   'results.low': 'Low',

@@ -104,7 +104,7 @@ export default {
   'chunked.merged': 'Dieses Dokument war lang und wurde in {count} Abschnitten analysiert. ',
   'chunked.sectionLabel': 'Abschnitt {number}: {summary}',
 
-  'results.truncated': '⚠ Dieses Dokument war lang – nur die ersten ~8.000 Zeichen wurden analysiert. Spätere Abschnitte wurden nicht geprüft.',
+  'results.truncated': '⚠ Dieses Dokument war lang – nur die ersten ~60.000 Zeichen wurden analysiert. Spätere Abschnitte wurden nicht geprüft.',
   'results.high': 'Hoch',
   'results.medium': 'Mittel',
   'results.low': 'Niedrig',

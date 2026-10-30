@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
-import { mergeAnalyses, CHUNK_INTERVAL_MS } from '../analysisChunking';
+import { mergeAnalyses, estimateMinutes, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES } from '../rateLimit';
 import { saveAnalysis } from '../history';
 import { showInterstitial } from '../ads';
@@ -85,7 +85,7 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
         }
 
         const isLast = i === chunks.length - 1;
-        if (!isLast && !cancelledRef.current) {
+        if (!isLast && !cancelledRef.current && CHUNK_INTERVAL_MS > 0) {
           // Pace requests to stay under the model provider's rate limits.
           let remainingMs = CHUNK_INTERVAL_MS;
           setSecondsLeft(Math.ceil(remainingMs / 1000));
@@ -135,7 +135,7 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
 
   const waiting = secondsLeft != null && secondsLeft > 0;
   const remainingChunks = chunks.length - currentIndex - 1;
-  const etaMinutes = Math.ceil((remainingChunks * CHUNK_INTERVAL_MS) / 60000);
+  const etaMinutes = estimateMinutes(remainingChunks);
   const overallProgress = (currentIndex + sectionProgress) / chunks.length;
 
   return (

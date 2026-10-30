@@ -105,7 +105,7 @@ export default {
   'chunked.merged': '该文档较长，已分成 {count} 段进行分析。',
   'chunked.sectionLabel': '第 {number} 段：{summary}',
 
-  'results.truncated': '⚠ 该文档较长，只分析了前约 8,000 个字符，后面的部分未经审阅。',
+  'results.truncated': '⚠ 该文档较长，只分析了前约 60,000 个字符，后面的部分未经审阅。',
   'results.high': '高',
   'results.medium': '中',
   'results.low': '低',

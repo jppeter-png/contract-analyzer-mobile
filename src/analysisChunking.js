@@ -1,12 +1,16 @@
 import { t } from './i18n';
 import { reportedInEverySection } from './coverage';
 
-// Must match backend/src/routes/analyze.js's MAX_INPUT_CHARS.
-export const MAX_CHARS_PER_ANALYSIS = 8000;
+// Must match backend/src/routes/analyze.js's MAX_INPUT_CHARS. Most documents fit in one pass; a larger section
+// keeps a definition and the clauses that use it together (8,000 characters split even a short contract).
+export const MAX_CHARS_PER_ANALYSIS = 60000;
 
-// How long to wait between chunk requests, to stay well under the model
-// provider's per-minute rate limits on a slow/free tier.
-export const CHUNK_INTERVAL_MS = 60000;
+// Wait between section requests. Zero now that the AI account is on a paid tier; it was 60 s on the free tier's
+// per-minute limit. A rate-limit reply is still handled (see rateLimit.js).
+export const CHUNK_INTERVAL_MS = 0;
+
+// One 60,000-character section takes about 7 s; rounded up for slower connections and busier moments.
+const SECONDS_PER_SECTION = 15;
 
 /**
  * Splits text into chunks no longer than maxLen, breaking on paragraph or
@@ -45,11 +49,12 @@ export function chunkText(text, maxLen = MAX_CHARS_PER_ANALYSIS) {
 }
 
 /**
- * Estimated wall-clock time to process `chunkCount` chunks, given the fixed
+ * Estimated wall-clock time to process `chunkCount` chunks, including any
  * inter-chunk pacing delay. Used to show the user an upfront ETA.
  */
 export function estimateMinutes(chunkCount) {
-  return Math.max(1, chunkCount); // ~1 minute per chunk, rounding up
+  const seconds = chunkCount * SECONDS_PER_SECTION + Math.max(0, chunkCount - 1) * (CHUNK_INTERVAL_MS / 1000);
+  return Math.max(1, Math.ceil(seconds / 60));
 }
 
 const RISK_RANK = { high: 3, medium: 2, low: 1 };

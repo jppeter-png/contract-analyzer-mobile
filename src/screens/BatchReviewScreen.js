@@ -105,7 +105,7 @@ export default function BatchReviewScreen({ navigation, route }) {
       const step = steps[s];
       if (failedFiles.has(step.fileIndex)) continue;
 
-      if (calledOnce) {
+      if (calledOnce && CHUNK_INTERVAL_MS > 0) {
         setStepInfo({ step: s, totalSteps: steps.length, waiting: true });
         await waitWithCountdown(CHUNK_INTERVAL_MS, (secs) =>
           setStepInfo({ step: s, totalSteps: steps.length, waiting: true, waitSeconds: secs })
