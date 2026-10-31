@@ -237,4 +237,21 @@ export default {
   'review.showFull': "Afficher le texte complet",
   'review.showLess': "Afficher moins",
   'review.nextRedaction': "Masquage suivant ({current}/{total})",
+
+  // ── Feedback ───────────────────────────────────────────
+  "feedback.prompt": "Des questions, des problèmes ou des idées ?",
+  "feedback.send": "Envoyer un commentaire",
+  "feedback.helpful": "Cette analyse vous a-t-elle été utile ?",
+  "feedback.yes": "👍 Utile",
+  "feedback.no": "👎 Pas utile",
+  "feedback.thanks": "Merci pour votre retour.",
+  "feedback.note": "Le commentaire ouvre un e-mail à notre adresse. Votre document n’est jamais joint.",
+  "feedback.whatWrong": "Qu’est-ce qui n’a pas fonctionné ?",
+  "feedback.kind.missed": "Un risque a été manqué",
+  "feedback.kind.tooMuch": "Quelque chose qui n’est pas un risque a été signalé",
+  "feedback.kind.summary": "Le résumé est faux ou peu clair",
+  "feedback.kind.other": "Autre chose",
+  "feedback.emailIntro": "Décrivez votre retour ici. Votre document n’est pas inclus dans cet e-mail.",
+  "feedback.noMail.title": "Impossible d’ouvrir Mail",
+  "feedback.noMail.message": "Écrivez plutôt à {email}.",
 };

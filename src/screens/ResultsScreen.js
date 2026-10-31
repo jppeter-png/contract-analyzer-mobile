@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import RiskBadge from '../components/RiskBadge';
 import IssueCard from '../components/IssueCard';
+import FeedbackRow from '../components/FeedbackRow';
 import { t, findingLabel } from '../i18n';
 
 export default function ResultsScreen({ navigation, route }) {
@@ -107,6 +108,8 @@ export default function ResultsScreen({ navigation, route }) {
             ))}
           </View>
         )}
+
+        <FeedbackRow analysis={analysis} />
 
         <Text style={styles.disclaimer}>{t('results.disclaimer')}</Text>
       </ScrollView>

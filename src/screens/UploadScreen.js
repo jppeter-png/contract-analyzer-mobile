@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import { scrubDocument, scrubText } from '../api';
 import { openLegalPage } from '../legalPages';
+import { openFeedbackEmail } from '../feedback';
 import { showAiConsentSettings } from '../aiConsent';
 import { t, getLanguage } from '../i18n';
 
@@ -278,6 +279,15 @@ export default function UploadScreen({ navigation }) {
             </Text>
           </Text>
         </View>
+
+        {/* Feedback */}
+        <TouchableOpacity style={styles.notice} onPress={() => openFeedbackEmail()} activeOpacity={0.7}>
+          <Text style={styles.noticeIcon}>💬</Text>
+          <Text style={styles.noticeText}>
+            {t('feedback.prompt')}{' '}
+            <Text style={styles.noticeLink}>{t('feedback.send')}</Text>
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

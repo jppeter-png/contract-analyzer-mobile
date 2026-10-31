@@ -237,4 +237,21 @@ export default {
   'review.showFull': "Mostrar el texto completo",
   'review.showLess': "Mostrar menos",
   'review.nextRedaction': "Siguiente ocultación ({current}/{total})",
+
+  // ── Feedback ───────────────────────────────────────────
+  "feedback.prompt": "¿Preguntas, problemas o ideas?",
+  "feedback.send": "Enviar comentarios",
+  "feedback.helpful": "¿Te resultó útil este análisis?",
+  "feedback.yes": "👍 Útil",
+  "feedback.no": "👎 No útil",
+  "feedback.thanks": "Gracias por tus comentarios.",
+  "feedback.note": "Los comentarios abren un correo dirigido a nosotros. Tu documento nunca se incluye.",
+  "feedback.whatWrong": "¿Qué salió mal?",
+  "feedback.kind.missed": "Se le pasó un riesgo",
+  "feedback.kind.tooMuch": "Marcó algo que no es un riesgo",
+  "feedback.kind.summary": "El resumen es incorrecto o confuso",
+  "feedback.kind.other": "Otra cosa",
+  "feedback.emailIntro": "Describe aquí tus comentarios. Tu documento no se incluye en este correo.",
+  "feedback.noMail.title": "No se pudo abrir Correo",
+  "feedback.noMail.message": "Escribe a {email} en su lugar.",
 };

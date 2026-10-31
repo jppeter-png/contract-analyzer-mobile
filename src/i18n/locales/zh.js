@@ -238,4 +238,21 @@ export default {
   'review.showFull': "显示全文",
   'review.showLess': "收起",
   'review.nextRedaction': "下一处隐去内容（{current}/{total}）",
+
+  // ── Feedback ───────────────────────────────────────────
+  "feedback.prompt": "有问题、遇到困难或有想法？",
+  "feedback.send": "发送反馈",
+  "feedback.helpful": "这份分析对您有帮助吗？",
+  "feedback.yes": "👍 有帮助",
+  "feedback.no": "👎 没有帮助",
+  "feedback.thanks": "感谢您的反馈。",
+  "feedback.note": "反馈会打开一封发给我们的邮件。您的文档绝不会被附上。",
+  "feedback.whatWrong": "哪里出了问题？",
+  "feedback.kind.missed": "漏掉了一项风险",
+  "feedback.kind.tooMuch": "标出了并非风险的内容",
+  "feedback.kind.summary": "摘要有误或不清楚",
+  "feedback.kind.other": "其他",
+  "feedback.emailIntro": "请在此描述您的反馈。这封邮件不包含您的文档。",
+  "feedback.noMail.title": "无法打开邮件",
+  "feedback.noMail.message": "请改为发送邮件至 {email}。",
 };

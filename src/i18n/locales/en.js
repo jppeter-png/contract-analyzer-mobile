@@ -252,4 +252,21 @@ export default {
   'review.showFull': "Show full text",
   'review.showLess': "Show less",
   'review.nextRedaction': "Next redaction ({current}/{total})",
+
+  // ── Feedback ───────────────────────────────────────────
+  "feedback.prompt": "Questions, problems or ideas?",
+  "feedback.send": "Send feedback",
+  "feedback.helpful": "Was this analysis helpful?",
+  "feedback.yes": "👍 Helpful",
+  "feedback.no": "👎 Not helpful",
+  "feedback.thanks": "Thanks for your feedback.",
+  "feedback.note": "Feedback opens an email to us. Your document is never included.",
+  "feedback.whatWrong": "What went wrong?",
+  "feedback.kind.missed": "It missed a risk",
+  "feedback.kind.tooMuch": "It flagged something that isn't a risk",
+  "feedback.kind.summary": "The summary is wrong or unclear",
+  "feedback.kind.other": "Something else",
+  "feedback.emailIntro": "Please describe your feedback here. Your document is not included in this email.",
+  "feedback.noMail.title": "Couldn't open Mail",
+  "feedback.noMail.message": "Please write to {email} instead.",
 };

@@ -237,4 +237,21 @@ export default {
   'review.showFull': "Gesamten Text anzeigen",
   'review.showLess': "Weniger anzeigen",
   'review.nextRedaction': "Nächste Schwärzung ({current}/{total})",
+
+  // ── Feedback ───────────────────────────────────────────
+  "feedback.prompt": "Fragen, Probleme oder Ideen?",
+  "feedback.send": "Feedback senden",
+  "feedback.helpful": "War diese Analyse hilfreich?",
+  "feedback.yes": "👍 Hilfreich",
+  "feedback.no": "👎 Nicht hilfreich",
+  "feedback.thanks": "Danke für Ihr Feedback.",
+  "feedback.note": "Feedback öffnet eine E-Mail an uns. Ihr Dokument wird nie angehängt.",
+  "feedback.whatWrong": "Was ist schiefgelaufen?",
+  "feedback.kind.missed": "Ein Risiko wurde übersehen",
+  "feedback.kind.tooMuch": "Etwas wurde markiert, das kein Risiko ist",
+  "feedback.kind.summary": "Die Zusammenfassung ist falsch oder unklar",
+  "feedback.kind.other": "Etwas anderes",
+  "feedback.emailIntro": "Beschreiben Sie hier Ihr Feedback. Ihr Dokument ist in dieser E-Mail nicht enthalten.",
+  "feedback.noMail.title": "Mail konnte nicht geöffnet werden",
+  "feedback.noMail.message": "Bitte schreiben Sie stattdessen an {email}.",
 };

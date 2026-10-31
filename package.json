@@ -7,7 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "check:i18n": "node scripts/check-i18n.js",
-    "check:coverage": "node scripts/check-coverage.js"
+    "check:coverage": "node scripts/check-coverage.js",
+    "check:feedback": "node scripts/check-feedback.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -22,6 +23,7 @@
     "expo-file-system": "~19.0.23",
     "expo-image-picker": "~17.0.11",
     "expo-status-bar": "~3.0.9",
+    "expo-store-review": "~9.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
