@@ -90,7 +90,6 @@ export default {
   'analyzing.step1': '正在阅读文档条款...',
   'analyzing.step2': '正在识别风险和漏洞...',
   'analyzing.step3': '正在准备您的报告...',
-  'analyzing.note': '通常需要 10 到 20 秒',
   'analyzing.cancelTitle': '取消分析？',
   'analyzing.cancelMessage': '您的进度将会丢失。',
   'analyzing.keepGoing': '继续',

@@ -70,7 +70,6 @@ export default function AnalyzingScreen({ navigation, route }) {
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#111" style={styles.spinner} />
         <Text style={styles.step}>{t(STEP_KEYS[stepIndex])}</Text>
-        <Text style={styles.note}>{t('analyzing.note')}</Text>
 
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${Math.round(progress * 100)}%` }]} />
@@ -88,8 +87,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   spinner: { marginBottom: 24 },
-  step: { fontSize: 18, fontWeight: '600', color: '#111', textAlign: 'center', marginBottom: 8 },
-  note: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 24 },
+  step: { fontSize: 18, fontWeight: '600', color: '#111', textAlign: 'center', marginBottom: 24 },
   progressTrack: {
     width: '100%', maxWidth: 280, height: 6, borderRadius: 3,
     backgroundColor: '#eee', overflow: 'hidden', marginBottom: 28,

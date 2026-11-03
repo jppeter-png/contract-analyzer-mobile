@@ -89,7 +89,6 @@ export default {
   'analyzing.step1': 'Klauseln des Dokuments werden gelesen...',
   'analyzing.step2': 'Risiken und Lücken werden erkannt...',
   'analyzing.step3': 'Ihr Bericht wird vorbereitet...',
-  'analyzing.note': 'Das dauert normalerweise 10–20 Sekunden',
   'analyzing.cancelTitle': 'Analyse abbrechen?',
   'analyzing.cancelMessage': 'Ihr Fortschritt geht verloren.',
   'analyzing.keepGoing': 'Fortfahren',

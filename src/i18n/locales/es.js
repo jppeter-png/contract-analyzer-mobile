@@ -89,7 +89,6 @@ export default {
   'analyzing.step1': 'Leyendo las cláusulas del documento...',
   'analyzing.step2': 'Identificando riesgos y lagunas...',
   'analyzing.step3': 'Preparando tu informe...',
-  'analyzing.note': 'Suele tardar entre 10 y 20 segundos',
   'analyzing.cancelTitle': '¿Cancelar el análisis?',
   'analyzing.cancelMessage': 'Se perderá el progreso.',
   'analyzing.keepGoing': 'Seguir',

@@ -98,7 +98,6 @@ export default {
   'analyzing.step1': 'Reading document clauses...',
   'analyzing.step2': 'Identifying risks and loopholes...',
   'analyzing.step3': 'Preparing your report...',
-  'analyzing.note': 'This usually takes 10–20 seconds',
   'analyzing.cancelTitle': 'Cancel analysis?',
   'analyzing.cancelMessage': 'Your progress will be lost.',
   'analyzing.keepGoing': 'Keep going',

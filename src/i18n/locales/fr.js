@@ -89,7 +89,6 @@ export default {
   'analyzing.step1': 'Lecture des clauses du document...',
   'analyzing.step2': 'Repérage des risques et des failles...',
   'analyzing.step3': 'Préparation de votre rapport...',
-  'analyzing.note': 'Cela prend généralement 10 à 20 secondes',
   'analyzing.cancelTitle': 'Annuler l’analyse ?',
   'analyzing.cancelMessage': 'Votre progression sera perdue.',
   'analyzing.keepGoing': 'Continuer',
