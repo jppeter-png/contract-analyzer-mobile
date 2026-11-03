@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
-import { mergeAnalyses, estimateMinutes, CHUNK_INTERVAL_MS } from '../analysisChunking';
+import { mergeAnalyses, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import { isBusy, retryAfterSeconds, MAX_BUSY_RETRIES } from '../rateLimit';
 import { saveAnalysis } from '../history';
 import { showInterstitial } from '../ads';
@@ -134,8 +134,6 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
   };
 
   const waiting = secondsLeft != null && secondsLeft > 0;
-  const remainingChunks = chunks.length - currentIndex - 1;
-  const etaMinutes = estimateMinutes(remainingChunks);
   const overallProgress = (currentIndex + sectionProgress) / chunks.length;
 
   return (
@@ -147,12 +145,6 @@ export default function ChunkedAnalyzingScreen({ navigation, route }) {
             ? t('chunked.waiting', { seconds: secondsLeft })
             : t('chunked.section', { current: currentIndex + 1, total: chunks.length })}
         </Text>
-        <Text style={styles.note}>
-          {remainingChunks > 0
-            ? t('chunked.eta', { count: etaMinutes })
-            : t('chunked.almostDone')}
-        </Text>
-
         <View style={styles.progressTrack}>
           <View style={[styles.progressFill, { width: `${Math.round(overallProgress * 100)}%` }]} />
         </View>
@@ -169,8 +161,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
   spinner: { marginBottom: 24 },
-  step: { fontSize: 18, fontWeight: '600', color: '#111', textAlign: 'center', marginBottom: 8 },
-  note: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 20 },
+  step: { fontSize: 18, fontWeight: '600', color: '#111', textAlign: 'center', marginBottom: 20 },
   progressTrack: {
     width: '100%', maxWidth: 280, height: 6, borderRadius: 3,
     backgroundColor: '#eee', overflow: 'hidden', marginBottom: 28,

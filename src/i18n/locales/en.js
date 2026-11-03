@@ -92,7 +92,7 @@ export default {
   'review.long.title': 'This document is long',
   'review.long.message': "It's {length} characters — longer than the {limit}-character limit analyzed in a single pass. Later sections would be skipped unless you choose to process it in full.",
   'review.long.anyway': 'Process anyway (may miss later sections)',
-  'review.long.full': 'Process in full, ~{minutes} min (splits into sections)',
+  'review.long.full': 'Process in full (splits into sections)',
 
   // ── Analyzing ─────────────────────────────────────────────────────────
   'analyzing.step1': 'Reading document clauses...',
@@ -104,9 +104,6 @@ export default {
   'analyzing.failed': 'Analysis failed',
   'chunked.waiting': 'Waiting to avoid rate limits... ({seconds}s)',
   'chunked.section': 'Analyzing section {current} of {total}...',
-  'chunked.eta_one': 'About {count} minute remaining',
-  'chunked.eta_other': 'About {count} minutes remaining',
-  'chunked.almostDone': 'Almost done',
   'chunked.cancelMessage': 'Progress on the current section will be lost.',
   'chunked.sectionFailed': 'Section {current} of {total} failed: {error}',
   'chunked.merged': 'This document was long and analyzed in {count} sections. ',
@@ -170,12 +167,11 @@ export default {
   'batch.analyzing': 'Analyzing...',
   'batch.analyzingOf': 'Analyzing {current} of {total}...',
   'batch.stepOf': 'Step {step} of {total}',
-  'batch.minutesRemaining': ' · ~{minutes} min remaining',
   'batch.cancelMessage': 'Files not yet analyzed will be skipped.',
   'batch.long.title': 'Some documents are long',
   'batch.long.message_one': '{count} of {total} files exceed the {limit}-character single-pass limit. Later sections in those files would be skipped unless you process everything in full.',
   'batch.long.message_other': '{count} of {total} files exceed the {limit}-character single-pass limit. Later sections in those files would be skipped unless you process everything in full.',
-  'batch.long.full': 'Process in full, ~{minutes} min ({sections} sections total)',
+  'batch.long.full': 'Process in full ({sections} sections total)',
   'batch.analyzeNew': '↺ Analyze new documents',
   'batch.disclaimer': 'This analysis is for informational purposes only and does not constitute legal advice.',
 

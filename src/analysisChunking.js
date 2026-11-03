@@ -9,8 +9,6 @@ export const MAX_CHARS_PER_ANALYSIS = 60000;
 // per-minute limit. A rate-limit reply is still handled (see rateLimit.js).
 export const CHUNK_INTERVAL_MS = 0;
 
-// One 60,000-character section takes about 7 s; rounded up for slower connections and busier moments.
-const SECONDS_PER_SECTION = 15;
 
 /**
  * Splits text into chunks no longer than maxLen, breaking on paragraph or
@@ -46,15 +44,6 @@ export function chunkText(text, maxLen = MAX_CHARS_PER_ANALYSIS) {
   }
 
   return chunks.filter(Boolean);
-}
-
-/**
- * Estimated wall-clock time to process `chunkCount` chunks, including any
- * inter-chunk pacing delay. Used to show the user an upfront ETA.
- */
-export function estimateMinutes(chunkCount) {
-  const seconds = chunkCount * SECONDS_PER_SECTION + Math.max(0, chunkCount - 1) * (CHUNK_INTERVAL_MS / 1000);
-  return Math.max(1, Math.ceil(seconds / 60));
 }
 
 const RISK_RANK = { high: 3, medium: 2, low: 1 };

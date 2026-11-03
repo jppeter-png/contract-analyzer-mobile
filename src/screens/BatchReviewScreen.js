@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { analyzeContract } from '../api';
 import { isBusy } from '../rateLimit';
 import { saveAnalysis } from '../history';
-import { chunkText, mergeAnalyses, estimateMinutes, MAX_CHARS_PER_ANALYSIS, CHUNK_INTERVAL_MS } from '../analysisChunking';
+import { chunkText, mergeAnalyses, MAX_CHARS_PER_ANALYSIS, CHUNK_INTERVAL_MS } from '../analysisChunking';
 import RiskBadge from '../components/RiskBadge';
 import { requestAiConsent } from '../aiConsent';
 import { t, findingLabel } from '../i18n';
@@ -180,7 +180,6 @@ export default function BatchReviewScreen({ navigation, route }) {
       return;
     }
 
-    const minutes = estimateMinutes(steps.length);
     Alert.alert(
       t('batch.long.title'),
       t('batch.long.message', {
@@ -190,7 +189,7 @@ export default function BatchReviewScreen({ navigation, route }) {
       }),
       [
         { text: t('review.long.anyway'), onPress: analyzeAll },
-        { text: t('batch.long.full', { minutes, sections: steps.length }), onPress: analyzeAllChunked },
+        { text: t('batch.long.full', { sections: steps.length }), onPress: analyzeAllChunked },
         { text: t('common.cancel'), style: 'cancel' },
       ]
     );
@@ -342,9 +341,6 @@ export default function BatchReviewScreen({ navigation, route }) {
               <View style={styles.batchProgressRow}>
                 <Text style={styles.batchProgressText}>
                   {t('batch.stepOf', { step: stepInfo.step, total: stepInfo.totalSteps })}
-                  {stepInfo.totalSteps - stepInfo.step > 0
-                    ? t('batch.minutesRemaining', { minutes: estimateMinutes(stepInfo.totalSteps - stepInfo.step) })
-                    : ''}
                 </Text>
                 <TouchableOpacity onPress={handleCancelChunked}>
                   <Text style={styles.batchCancelText}>{t('common.cancel')}</Text>

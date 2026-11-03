@@ -54,7 +54,7 @@ mobile/
     │   ├── UploadScreen.js       # Entry point: upload file / paste text / camera / history tabs
     │   ├── ReviewScreen.js       # Review redacted PII, pick contract type, trigger analysis
     │   ├── AnalyzingScreen.js    # Loading state for a single-pass analysis
-    │   ├── ChunkedAnalyzingScreen.js  # Progress/ETA UI for the multi-section flow
+    │   ├── ChunkedAnalyzingScreen.js  # Progress UI for the multi-section flow
     │   ├── ResultsScreen.js      # Risk summary, issues, missing protections
     │   ├── CameraScreen.js       # Multi-page photo capture → OCR
     │   ├── BatchReviewScreen.js  # Analyze multiple uploaded files at once
@@ -72,7 +72,7 @@ mobile/
 The backend caps a single `/api/analyze` call at 60,000 characters (about 15 pages; it was 8,000 before the AI account moved to a paid tier). When a contract's scrubbed text exceeds that, the user is asked to choose before anything is sent:
 
 1. **Process anyway** — analyze just the first 60,000 characters; the response's `truncated: true` flag drives a visible warning banner on the results screen.
-2. **Process in full** — the client splits the scrubbed text into ≤60,000-char sections (`analysisChunking.js`'s `chunkText`, breaking on paragraph/whitespace boundaries) and calls `/api/analyze` once per section, with an optional pause between sections (`CHUNK_INTERVAL_MS`, now 0), showing live progress and an ETA (`ChunkedAnalyzingScreen.js`, with a cancel option). Each call sets `chunkContext: { index, total }` so the backend doesn't flag a clause "missing" just because it's in a different section. Results are merged client-side (`mergeAnalyses`): `overall_risk` takes the worst across sections, `issues` and `missing_protections` are combined and deduped.
+2. **Process in full** — the client splits the scrubbed text into ≤60,000-char sections (`analysisChunking.js`'s `chunkText`, breaking on paragraph/whitespace boundaries) and calls `/api/analyze` once per section, with an optional pause between sections (`CHUNK_INTERVAL_MS`, now 0), showing live progress (no time estimate: it would promise something the app cannot always keep) (`ChunkedAnalyzingScreen.js`, with a cancel option). Each call sets `chunkContext: { index, total }` so the backend doesn't flag a clause "missing" just because it's in a different section. Results are merged client-side (`mergeAnalyses`): `overall_risk` takes the worst across sections, `issues` and `missing_protections` are combined and deduped.
 3. **Cancel** — abort before any request is sent.
 
 This entire flow lives in the mobile app (`ReviewScreen.js` → `ChunkedAnalyzingScreen.js`); the backend has no separate "chunked" endpoint.

@@ -3,7 +3,7 @@ import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { chunkText, estimateMinutes, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
+import { chunkText, MAX_CHARS_PER_ANALYSIS } from '../analysisChunking';
 import { preloadInterstitial } from '../ads';
 import { requestAiConsent } from '../aiConsent';
 import { LOW_OCR_CONFIDENCE, sourceInfo } from '../coverage';
@@ -61,7 +61,6 @@ export default function ReviewScreen({ navigation, route }) {
       return;
     }
 
-    const minutes = estimateMinutes(Math.ceil(scrubbedText.length / MAX_CHARS_PER_ANALYSIS));
     Alert.alert(
       t('review.long.title'),
       t('review.long.message', {
@@ -74,7 +73,7 @@ export default function ReviewScreen({ navigation, route }) {
           onPress: runNormalAnalysis,
         },
         {
-          text: t('review.long.full', { minutes }),
+          text: t('review.long.full'),
           onPress: runChunkedAnalysis,
         },
         { text: t('common.cancel'), style: 'cancel' },
