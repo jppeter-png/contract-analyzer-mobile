@@ -15,6 +15,7 @@ import BatchReviewScreen from './src/screens/BatchReviewScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import TermsGateScreen from './src/screens/TermsGateScreen';
 import LanguageScreen from './src/screens/LanguageScreen';
+import MyDetailsScreen from './src/screens/MyDetailsScreen';
 import { hasAcceptedCurrentTerms } from './src/terms';
 import { loadLanguage, subscribeLanguage } from './src/i18n';
 
@@ -68,6 +69,7 @@ export default function App() {
             <Stack.Screen name="BatchReview" component={BatchReviewScreen} />
             <Stack.Screen name="History" component={HistoryScreen} />
             <Stack.Screen name="Language" component={LanguageScreen} />
+            <Stack.Screen name="MyDetails" component={MyDetailsScreen} />
             <Stack.Screen name="Analyzing" component={AnalyzingScreen} />
             <Stack.Screen name="ChunkedAnalyzing" component={ChunkedAnalyzingScreen} />
             <Stack.Screen name="Results" component={ResultsScreen} />

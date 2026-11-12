@@ -8,17 +8,34 @@ import { preloadInterstitial } from '../ads';
 import { requestAiConsent } from '../aiConsent';
 import { LOW_OCR_CONFIDENCE, sourceInfo } from '../coverage';
 import { splitSegments, redactionStarts, passageAround } from '../redactionPreview';
+import { scrubText } from '../api';
+import AddTermField from '../components/AddTermField';
+import { getExtraTerms } from '../customTerms';
 import { t, findingLabel, displayFileName } from '../i18n';
 
+const HIDDEN_LABEL = 'Hidden by you'; // what the server calls the items the user asked to hide
 const CONTRACT_TYPES = ['auto', 'employment', 'nda', 'lease', 'service', 'loan', 'tos'];
 
 export default function ReviewScreen({ navigation, route }) {
-  const { scrubResult, fileName, fromPhotos = false, ocrConfidence = 100 } = route.params;
+  const { scrubResult: initialResult, fileName, fromPhotos = false, ocrConfidence = 100 } = route.params;
   const hardToRead = fromPhotos && ocrConfidence < LOW_OCR_CONFIDENCE;
+  // Changes when the user hides something the automatic pass missed.
+  const [scrubResult, setScrubResult] = useState(initialResult);
   const { scrubbedText, findings = [], wordCount, totalRedacted } = scrubResult;
+  const autoDetectOff = scrubResult.autoDetect === false;
+  // Only items typed for this session are worth flagging: a saved name is not expected in every document.
+  const notFound = (scrubResult.termMatches || [])
+    .filter(m => m.count === 0 && getExtraTerms().some(e => e.toLowerCase() === m.term.toLowerCase()))
+    .map(m => m.term);
+  const [missedBusy, setMissedBusy] = useState(false);
 
   const [selectedType, setSelectedType] = useState('auto');
   const [expandedIndex, setExpandedIndex] = useState(null);
+  // The list of redacted items opens on tap so the screen starts uncluttered; the text that will be sent
+  // is always open, because reading it is the point of this screen.
+  const [showFindings, setShowFindings] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
+  const [typeOpen, setTypeOpen] = useState(false);
 
   // The preview opens at the first redaction (not the top of the document, where there may be none),
   // can jump between them, and can show the whole text that will be sent.
@@ -33,6 +50,35 @@ export default function ReviewScreen({ navigation, route }) {
     () => splitSegments(showFull ? scrubbedText : passage.text),
     [showFull, scrubbedText, passage],
   );
+
+  // Sends the text we already hold (the original stays out of it) back with the one new item,
+  // asking the server to hide only that.
+  const hideMissed = async raw => {
+    const term = raw.replace(/\s+/g, ' ').trim();
+    if (term.length < 2) return { error: t('details.err.short') };
+    setMissedBusy(true);
+    try {
+      const next = await scrubText(scrubbedText, { customTerms: [term], autoDetect: false });
+      if (!next.termMatches?.[0]?.count) return { error: t('review.missed.notFound') };
+      const added = next.findings.find(f => f.label === HIDDEN_LABEL);
+      const merged = findings.map(f => (f.label === HIDDEN_LABEL
+        ? { ...f, count: f.count + added.count, redacted: [...new Set([...f.redacted, ...added.redacted])] }
+        : f));
+      if (!findings.some(f => f.label === HIDDEN_LABEL)) merged.unshift(added);
+      setScrubResult({
+        ...scrubResult,
+        scrubbedText: next.scrubbedText,
+        findings: merged,
+        totalRedacted: merged.reduce((sum, f) => sum + f.count, 0),
+      });
+      setFocus(0);
+      return { ok: true };
+    } catch {
+      return { error: t('review.missed.error') };
+    } finally {
+      setMissedBusy(false);
+    }
+  };
 
   useEffect(() => {
     preloadInterstitial(); // so it's likely ready by the time the user taps Analyze
@@ -93,39 +139,64 @@ export default function ReviewScreen({ navigation, route }) {
           {fileName ? `"${displayFileName(fileName)}" · ` : ''}{t('review.words', { count: wordCount ?? 0 })}
         </Text>
 
+        {autoDetectOff && (
+          <View style={[styles.alert, styles.alertDanger]}>
+            <Text style={[styles.alertTitle, styles.alertTitleDanger]}>{t('review.autoOff.title')}</Text>
+            <Text style={styles.alertBody}>{t('review.autoOff.body')}</Text>
+          </View>
+        )}
+
         {/* PII findings */}
         {totalRedacted > 0 ? (
           <View style={[styles.alert, styles.alertWarning]}>
-            <Text style={[styles.alertTitle, styles.alertTitleWarning]}>
-              {t('review.redactedTitle', { count: totalRedacted })}
-            </Text>
-            {findings.map(({ label, count, redacted = [] }, i) => (
-              <View key={label} style={styles.findingRow}>
-                <TouchableOpacity
-                  style={styles.findingHeader}
-                  onPress={() => setExpandedIndex(expandedIndex === i ? null : i)}
-                >
-                  <View style={styles.pill}>
-                    <Text style={styles.pillText}>{findingLabel(label)} ×{count}</Text>
+            <TouchableOpacity
+              style={styles.collapseHeader}
+              onPress={() => setShowFindings(v => !v)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: showFindings }}
+            >
+              <Text style={[styles.alertTitle, styles.alertTitleWarning, styles.collapseTitle]}>
+                {t('review.redactedTitle', { count: totalRedacted })}
+              </Text>
+              <Text style={styles.expandHint}>{showFindings ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+            {showFindings && (
+              <View style={styles.findingsBody}>
+                {findings.map(({ label, count, redacted = [] }, i) => (
+                  <View key={label} style={styles.findingRow}>
+                    <TouchableOpacity
+                      style={styles.findingHeader}
+                      onPress={() => setExpandedIndex(expandedIndex === i ? null : i)}
+                    >
+                      <View style={styles.pill}>
+                        <Text style={styles.pillText}>{findingLabel(label)} ×{count}</Text>
+                      </View>
+                      {redacted.length > 0 && (
+                        <Text style={styles.expandHint}>{expandedIndex === i ? '▲' : '▼'}</Text>
+                      )}
+                    </TouchableOpacity>
+                    {expandedIndex === i && redacted.length > 0 && (
+                      <View style={styles.redactedList}>
+                        {redacted.map((item, j) => (
+                          <Text key={j} style={styles.redactedItem}>• {item}</Text>
+                        ))}
+                      </View>
+                    )}
                   </View>
-                  {redacted.length > 0 && (
-                    <Text style={styles.expandHint}>{expandedIndex === i ? '▲' : '▼'}</Text>
-                  )}
-                </TouchableOpacity>
-                {expandedIndex === i && redacted.length > 0 && (
-                  <View style={styles.redactedList}>
-                    {redacted.map((item, j) => (
-                      <Text key={j} style={styles.redactedItem}>• {item}</Text>
-                    ))}
-                  </View>
-                )}
+                ))}
               </View>
-            ))}
+            )}
           </View>
         ) : (
-          <View style={[styles.alert, styles.alertSuccess]}>
-            <Text style={[styles.alertTitle, styles.alertTitleSuccess]}>{t('review.noPii')}</Text>
-          </View>
+          !autoDetectOff && (
+            <View style={[styles.alert, styles.alertSuccess]}>
+              <Text style={[styles.alertTitle, styles.alertTitleSuccess]}>{t('review.noPii')}</Text>
+            </View>
+          )
+        )}
+
+        {notFound.length > 0 && (
+          <Text style={styles.notFound}>{t('review.notFound', { terms: notFound.join(', ') })}</Text>
         )}
 
         {/* Text read from photos can contain recognition mistakes */}
@@ -137,53 +208,90 @@ export default function ReviewScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Exactly what will be sent */}
+        {/* Exactly what will be sent, and a way to hide anything the automatic pass left visible */}
         {!!scrubbedText && (
           <>
-            <Text style={styles.sectionLabel}>{t('review.sentLabel')}</Text>
-            <View style={styles.previewBox}>
-              <Text style={styles.previewText}>
-                {!showFull && passage.cutBefore ? '… ' : ''}
-                {segments.map((segment, i) => (segment.redacted
-                  ? <Text key={i} style={styles.redactionChip}>{segment.text}</Text>
-                  : segment.text))}
-                {!showFull && passage.cutAfter ? ' …' : ''}
-              </Text>
-            </View>
-            <View style={styles.previewActions}>
-              <TouchableOpacity onPress={() => setShowFull(v => !v)}>
-                <Text style={styles.previewLink}>{showFull ? t('review.showLess') : t('review.showFull')}</Text>
-              </TouchableOpacity>
-              {!showFull && starts.length > 1 && (
-                <TouchableOpacity onPress={() => setFocus(f => (f + 1) % starts.length)}>
-                  <Text style={styles.previewLink}>
-                    {t('review.nextRedaction', { current: focus + 1, total: starts.length })}
+            <TouchableOpacity
+              style={[styles.sectionToggle, !showPreview && styles.sectionToggleClosed]}
+              onPress={() => setShowPreview(v => !v)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: showPreview }}
+            >
+              <Text style={[styles.sectionLabel, styles.sectionToggleLabel]}>{t('review.sentLabel')}</Text>
+              <Text style={styles.expandHint}>{showPreview ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+            {showPreview && (
+              <>
+                <View style={styles.previewBox}>
+                  <Text style={styles.previewText}>
+                    {!showFull && passage.cutBefore ? '… ' : ''}
+                    {segments.map((segment, i) => (segment.redacted
+                      ? <Text key={i} style={styles.redactionChip}>{segment.text}</Text>
+                      : segment.text))}
+                    {!showFull && passage.cutAfter ? ' …' : ''}
                   </Text>
-                </TouchableOpacity>
-              )}
-            </View>
+                </View>
+                <View style={styles.previewActions}>
+                  <TouchableOpacity onPress={() => setShowFull(v => !v)}>
+                    <Text style={styles.previewLink}>{showFull ? t('review.showLess') : t('review.showFull')}</Text>
+                  </TouchableOpacity>
+                  {!showFull && starts.length > 1 && (
+                    <TouchableOpacity onPress={() => setFocus(f => (f + 1) % starts.length)}>
+                      <Text style={styles.previewLink}>
+                        {t('review.nextRedaction', { current: focus + 1, total: starts.length })}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <View style={styles.missed}>
+                  <Text style={styles.missedTitle}>{t('review.missed.title')}</Text>
+                  <Text style={styles.missedDesc}>{t('review.missed.desc')}</Text>
+                  <AddTermField
+                    placeholder={t('review.missed.placeholder')}
+                    buttonLabel={t('review.missed.add')}
+                    onAdd={hideMissed}
+                    busy={missedBusy}
+                  />
+                </View>
+              </>
+            )}
           </>
         )}
 
         {/* Document type selector */}
         <Text style={styles.sectionLabel}>{t('review.docType')}</Text>
         <Text style={styles.sectionDesc}>{t('review.docTypeDesc')}</Text>
-        <View style={styles.typeGrid}>
-          {CONTRACT_TYPES.map((key) => (
-            <TouchableOpacity
-              key={key}
-              style={[styles.typeCard, selectedType === key && styles.typeCardSelected]}
-              onPress={() => setSelectedType(key)}
-            >
-              <Text style={[styles.typeLabel, selectedType === key && styles.typeLabelSelected]}>
-                {t(`review.type.${key}`)}
-              </Text>
-              <Text style={[styles.typeDesc, selectedType === key && styles.typeDescSelected]}>
-                {t(`review.type.${key}.desc`)}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <TouchableOpacity
+          style={styles.typeCurrent}
+          onPress={() => setTypeOpen(v => !v)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: typeOpen }}
+        >
+          <View style={styles.typeCurrentText}>
+            <Text style={[styles.typeLabel, styles.typeLabelSelected]}>{t(`review.type.${selectedType}`)}</Text>
+            <Text style={[styles.typeDesc, styles.typeDescSelected]}>{t(`review.type.${selectedType}.desc`)}</Text>
+          </View>
+          <Text style={styles.typeCaret}>{typeOpen ? '▲' : '▼'}</Text>
+        </TouchableOpacity>
+        {typeOpen && (
+          <View style={styles.typeGrid}>
+            {CONTRACT_TYPES.filter(key => key !== selectedType).map((key) => (
+              <TouchableOpacity
+                key={key}
+                style={[styles.typeCard, selectedType === key && styles.typeCardSelected]}
+                onPress={() => { setSelectedType(key); setTypeOpen(false); }}
+              >
+                <Text style={[styles.typeLabel, selectedType === key && styles.typeLabelSelected]}>
+                  {t(`review.type.${key}`)}
+                </Text>
+                <Text style={[styles.typeDesc, selectedType === key && styles.typeDescSelected]}>
+                  {t(`review.type.${key}.desc`)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         <Text style={styles.confirmNote}>{t('review.confirmNote')}</Text>
 
@@ -205,6 +313,19 @@ const styles = StyleSheet.create({
   alert: { borderRadius: 10, padding: 14, marginBottom: 20 },
   alertWarning: { backgroundColor: '#fffbeb', borderWidth: 1, borderColor: '#fde68a' },
   alertSuccess: { backgroundColor: '#f0fdf4', borderWidth: 1, borderColor: '#bbf7d0' },
+  alertDanger: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca' },
+  alertTitleDanger: { color: '#991b1b' },
+  alertBody: { fontSize: 13, color: '#7f1d1d', lineHeight: 19 },
+  notFound: { fontSize: 12, color: '#b45309', marginTop: -10, marginBottom: 16 },
+  missed: { backgroundColor: '#fffaf0', borderRadius: 12, borderWidth: 1, borderColor: '#fde68a', padding: 14, marginBottom: 20 },
+  missedTitle: { fontSize: 14, fontWeight: '600', color: '#92400e' },
+  missedDesc: { fontSize: 13, color: '#666', lineHeight: 19, marginTop: 2, marginBottom: 10 },
+  collapseHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  collapseTitle: { flex: 1, marginBottom: 0 },
+  findingsBody: { marginTop: 10 },
+  sectionToggle: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, paddingVertical: 4 },
+  sectionToggleClosed: { marginBottom: 24 },
+  sectionToggleLabel: { marginBottom: 0 },
   alertTitle: { fontSize: 14, fontWeight: '600', marginBottom: 10 },
   alertTitleWarning: { color: '#92400e' },
   alertTitleSuccess: { color: '#166534' },
@@ -238,6 +359,12 @@ const styles = StyleSheet.create({
   redactionChip: { backgroundColor: '#111', color: '#fff', fontWeight: '700' },
   previewActions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, marginBottom: 20 },
   previewLink: { fontSize: 13, color: '#2f6fd0', fontWeight: '500' },
+  typeCurrent: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+    padding: 14, borderRadius: 10, backgroundColor: '#111', marginBottom: 12,
+  },
+  typeCurrentText: { flex: 1 },
+  typeCaret: { fontSize: 11, color: '#ccc' },
   typeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 },
   typeCard: {
     width: '48%', padding: 12, borderRadius: 10,

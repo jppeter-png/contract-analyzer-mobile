@@ -1,28 +1,38 @@
 import axios from 'axios';
 import { getLanguage } from './i18n';
+import { getScrubOptions } from './customTerms';
 
-export const BASE_URL = 'https://contract-analyzer-backend-2ijl.onrender.com';
+// EXPO_PUBLIC_API_URL points a development build at a local server; release builds leave it unset.
+export const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://contract-analyzer-backend-2ijl.onrender.com';
 
 const api = axios.create({
   baseURL: BASE_URL,
   timeout: 120000,
 });
 
-export async function scrubDocument(file) {
+// options: { customTerms, autoDetect }. Left out, the user's saved details and "also hide" items apply.
+export async function scrubDocument(file, options) {
+  const { customTerms, autoDetect } = options || await getScrubOptions();
   const form = new FormData();
   form.append('file', {
     uri: file.uri,
     name: file.name,
     type: file.mimeType || 'application/octet-stream',
   });
+  if (customTerms.length) form.append('customTerms', JSON.stringify(customTerms));
+  if (!autoDetect) form.append('autoDetect', 'false');
   const { data } = await api.post('/api/scrub', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data;
 }
 
-export async function scrubText(text) {
-  const { data } = await api.post('/api/scrub', { text }, {
+export async function scrubText(text, options) {
+  const { customTerms, autoDetect } = options || await getScrubOptions();
+  const body = { text };
+  if (customTerms.length) body.customTerms = customTerms;
+  if (!autoDetect) body.autoDetect = false;
+  const { data } = await api.post('/api/scrub', body, {
     headers: { 'Content-Type': 'application/json' },
   });
   return data;

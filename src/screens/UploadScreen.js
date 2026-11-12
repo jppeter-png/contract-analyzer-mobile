@@ -9,6 +9,8 @@ import { scrubDocument, scrubText } from '../api';
 import { openLegalPage } from '../legalPages';
 import { openFeedbackEmail } from '../feedback';
 import { showAiConsentSettings } from '../aiConsent';
+import ExtraTerms from '../components/ExtraTerms';
+import { useCustomTerms } from '../customTerms';
 import { t, getLanguage } from '../i18n';
 
 const TAB_KEYS = ['upload.tab.file', 'upload.tab.paste', 'upload.tab.camera', 'upload.tab.history'];
@@ -20,6 +22,7 @@ export default function UploadScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [analyzingIndex, setAnalyzingIndex] = useState(null);
   const scrubbing = loading || analyzingIndex !== null;
+  const { saved } = useCustomTerms();
 
   const handleFilePick = async () => {
     try {
@@ -243,6 +246,9 @@ export default function UploadScreen({ navigation }) {
           </TouchableOpacity>
         )}
 
+        {/* Extra names and addresses to hide, and the automatic-detection switch */}
+        {activeTab !== 3 && <ExtraTerms />}
+
         {/* Privacy notice */}
         <View style={styles.notice}>
           <Text style={styles.noticeIcon}>🔒</Text>
@@ -259,6 +265,17 @@ export default function UploadScreen({ navigation }) {
             </Text>
           </Text>
         </View>
+
+        {/* Your details: names and addresses hidden in every document */}
+        <TouchableOpacity style={styles.notice} onPress={() => navigation.navigate('MyDetails')} activeOpacity={0.7}>
+          <Text style={styles.noticeIcon}>🛡️</Text>
+          <Text style={styles.noticeText}>
+            {t('details.row')}{' '}
+            <Text style={styles.noticeLink}>
+              {saved.length ? t('details.row.count', { count: saved.length }) : t('details.row.add')}
+            </Text>
+          </Text>
+        </TouchableOpacity>
 
         {/* Language */}
         <TouchableOpacity style={styles.notice} onPress={() => navigation.navigate('Language')} activeOpacity={0.7}>
