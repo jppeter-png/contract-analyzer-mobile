@@ -1,26 +1,24 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, Image,
-  StyleSheet, Alert, ActivityIndicator, Dimensions,
+  StyleSheet, Alert, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { ocrImages, scrubText } from '../api';
 import { t, getLanguage, SUPPORTED_LANGUAGES } from '../i18n';
 
 const { width } = Dimensions.get('window');
 const THUMB = (width - 48 - 12) / 3;
 
-export default function CameraScreen({ navigation }) {
+export default function CameraScreen({ navigation, route }) {
   const [permission, requestPermission] = useCameraPermissions();
-  const [pages, setPages] = useState([]); // Array of { uri }
+  // Pages already taken (coming back to retake or add more), as { uri }.
+  const [pages, setPages] = useState(route.params?.pages || []);
   const [showCamera, setShowCamera] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [statusMsg, setStatusMsg] = useState('');
   // The language the pages are written in (not the app's language): it decides how the
   // photos are read. Defaults to the user's own language; English is always included.
-  const [documentLanguage, setDocumentLanguage] = useState(getLanguage());
+  const [documentLanguage, setDocumentLanguage] = useState(route.params?.documentLanguage || getLanguage());
   const cameraRef = useRef(null);
 
   // Pick from camera roll
@@ -50,36 +48,10 @@ export default function CameraScreen({ navigation }) {
     setPages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleDone = async () => {
+  // The pages go back to the start screen; reading and hiding happen when the user runs the analysis there.
+  const handleDone = () => {
     if (!pages.length) return;
-    setShowCamera(false);
-    setProcessing(true);
-
-    try {
-      setStatusMsg(t('camera.ocrRunning', { count: pages.length }));
-      const { text, confidence, lowestPageConfidence } = await ocrImages(pages, documentLanguage);
-
-      if (!text.trim()) {
-        Alert.alert(t('camera.noTextTitle'), t('camera.noTextMessage'));
-        setProcessing(false);
-        return;
-      }
-
-      setStatusMsg(t('camera.scanning'));
-      const scrubResult = await scrubText(text);
-
-      // The review screen warns that this text came from photos, more strongly if they were hard to read.
-      navigation.navigate('Review', {
-        scrubResult,
-        fromPhotos: true,
-        ocrConfidence: [confidence, lowestPageConfidence].filter(Number.isFinite).reduce((a, b) => Math.min(a, b), 100),
-      });
-    } catch (err) {
-      Alert.alert(t('common.error'), err.response?.data?.error || err.message || t('camera.err.generic'));
-    } finally {
-      setProcessing(false);
-      setStatusMsg('');
-    }
+    navigation.navigate('Start', { photos: pages, photoLanguage: documentLanguage });
   };
 
   // Request camera permission if needed
@@ -93,18 +65,6 @@ export default function CameraScreen({ navigation }) {
     }
     setShowCamera(true);
   };
-
-  if (processing) {
-    return (
-      <SafeAreaView style={styles.safe}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#111" />
-          <Text style={styles.processingText}>{statusMsg}</Text>
-          <Text style={styles.processingNote}>{t('camera.processingNote')}</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   if (showCamera) {
     return (
@@ -226,7 +186,7 @@ export default function CameraScreen({ navigation }) {
         {/* Analyze button */}
         {pages.length > 0 && (
           <TouchableOpacity style={styles.btn} onPress={handleDone}>
-            <Text style={styles.btnText}>{t('camera.extract', { count: pages.length })}</Text>
+            <Text style={styles.btnText}>{t('camera.use', { count: pages.length })}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -237,9 +197,6 @@ export default function CameraScreen({ navigation }) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fff' },
   container: { padding: 24, paddingBottom: 48 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 },
-  processingText: { fontSize: 18, fontWeight: '600', color: '#111', marginTop: 20, textAlign: 'center' },
-  processingNote: { fontSize: 13, color: '#888', marginTop: 8, textAlign: 'center' },
   back: { marginBottom: 16 },
   backText: { fontSize: 15, color: '#555' },
   title: { fontSize: 24, fontWeight: '700', color: '#111', marginBottom: 8 },

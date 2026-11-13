@@ -35,7 +35,7 @@ export default function ResultsScreen({ navigation, route }) {
 
         <View style={styles.headerRow}>
           <RiskBadge risk={overall_risk} large />
-          <TouchableOpacity onPress={() => navigation.navigate('Upload')} style={styles.newBtn}>
+          <TouchableOpacity onPress={() => navigation.navigate('Welcome')} style={styles.newBtn}>
             <Text style={styles.newBtnText}>{t('common.home')}</Text>
           </TouchableOpacity>
         </View>

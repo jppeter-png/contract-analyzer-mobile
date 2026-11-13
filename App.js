@@ -5,7 +5,10 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import mobileAds from 'react-native-google-mobile-ads';
 
-import UploadScreen from './src/screens/UploadScreen';
+import WelcomeScreen from './src/screens/WelcomeScreen';
+import StartScreen from './src/screens/StartScreen';
+import SupportScreen from './src/screens/SupportScreen';
+import GuideScreen from './src/screens/GuideScreen';
 import ReviewScreen from './src/screens/ReviewScreen';
 import AnalyzingScreen from './src/screens/AnalyzingScreen';
 import ChunkedAnalyzingScreen from './src/screens/ChunkedAnalyzingScreen';
@@ -60,10 +63,13 @@ export default function App() {
         {/* key: remounting redraws every screen when the language changes */}
         <NavigationContainer key={language}>
           <Stack.Navigator
-            initialRouteName="Upload"
+            initialRouteName="Welcome"
             screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
           >
-            <Stack.Screen name="Upload" component={UploadScreen} />
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
+            <Stack.Screen name="Start" component={StartScreen} />
+            <Stack.Screen name="Support" component={SupportScreen} />
+            <Stack.Screen name="Guide" component={GuideScreen} />
             <Stack.Screen name="Camera" component={CameraScreen} />
             <Stack.Screen name="Review" component={ReviewScreen} />
             <Stack.Screen name="BatchReview" component={BatchReviewScreen} />

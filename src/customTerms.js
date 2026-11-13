@@ -2,11 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { t } from './i18n';
 
-// Names, addresses and ID numbers the user wants hidden. The server hides them as well as what it
-// detects by itself. Two lists:
-//   saved  - "Your details": kept on this phone and applied to every document
-//   extra  - "Also hide these": kept in memory only, gone when the app closes
-// Automatic detection is switched off per session at most, and always starts on.
+// Names, addresses and ID numbers the user wants hidden in every document ("Your details"). The server
+// hides them as well as what it detects by itself. They are kept on this phone only.
+// Items typed on the review screen, and the "hide only my items" choice, live on that screen and are
+// gone when it closes.
 
 const KEY = 'contract_analyzer_my_details';
 export const MAX_TERMS = 50; // the server refuses more
@@ -14,8 +13,6 @@ export const MIN_LENGTH = 2;
 export const MAX_LENGTH = 100;
 
 let saved = [];
-let extra = [];
-let autoDetect = true;
 let loadFailed = false;
 let loading = null;
 const listeners = new Set();
@@ -23,7 +20,6 @@ const listeners = new Set();
 const notify = () => listeners.forEach(listener => listener());
 const clean = raw => String(raw || '').replace(/\s+/g, ' ').trim();
 const same = (a, b) => a.toLowerCase() === b.toLowerCase();
-const union = () => [...saved, ...extra.filter(e => !saved.some(s => same(s, e)))];
 
 /** Reads the saved list once. Anything that scrubs a document waits for this. */
 export function loadSavedTerms() {
@@ -41,21 +37,24 @@ export function loadSavedTerms() {
 
 const persist = () => AsyncStorage.setItem(KEY, JSON.stringify(saved)).catch(() => {});
 
-function tryAdd(list, raw) {
+/** Checks a typed item against the rules and the items already on the list: { term } or { error }. */
+export function checkNewTerm(raw, existing) {
   const term = clean(raw);
   if (term.length < MIN_LENGTH) return { error: t('details.err.short') };
   if (term.length > MAX_LENGTH) return { error: t('details.err.long', { max: MAX_LENGTH }) };
-  if (union().some(item => same(item, term))) return { error: t('details.err.duplicate') };
-  if (union().length >= MAX_TERMS) return { error: t('details.err.limit', { max: MAX_TERMS }) };
-  list.push(term);
-  return { ok: true };
+  if (existing.some(item => same(item, term))) return { error: t('details.err.duplicate') };
+  if (existing.length >= MAX_TERMS) return { error: t('details.err.limit', { max: MAX_TERMS }) };
+  return { term };
 }
 
 export async function addSavedTerm(raw) {
   await loadSavedTerms();
-  const result = tryAdd(saved, raw);
-  if (result.ok) { await persist(); notify(); }
-  return result;
+  const result = checkNewTerm(raw, saved);
+  if (result.error) return result;
+  saved.push(result.term);
+  await persist();
+  notify();
+  return { ok: true };
 }
 
 export async function removeSavedTerm(term) {
@@ -64,35 +63,21 @@ export async function removeSavedTerm(term) {
   notify();
 }
 
-export function addExtraTerm(raw) {
-  const result = tryAdd(extra, raw);
-  if (result.ok) notify();
-  return result;
-}
-
-export function removeExtraTerm(term) {
-  extra = extra.filter(item => item !== term);
-  notify();
-}
-
-export const getExtraTerms = () => extra;
-
-export function setAutoDetect(on) {
-  autoDetect = !!on;
-  notify();
-}
-
 /**
- * What to send with a document: every saved and session term, and whether automatic detection is on.
+ * What to send with a document. By default: the saved details, with automatic detection on.
+ * options.extra: more items to hide (typed on the review screen); options.autoDetect: false hides only the listed items.
  * Refuses to continue if the saved list could not be read, so a document is never sent unhidden by mistake.
  */
-export async function getScrubOptions() {
+export async function getScrubOptions({ extra = [], autoDetect = true } = {}) {
   await loadSavedTerms();
   if (loadFailed) throw new Error(t('details.err.load'));
-  return { customTerms: union(), autoDetect };
+  return {
+    customTerms: [...saved, ...extra.filter(e => !saved.some(s => same(s, e)))],
+    autoDetect,
+  };
 }
 
-/** Live view of the lists for a screen. */
+/** The saved details, for the screens that list or count them, kept in step with changes. */
 export function useCustomTerms() {
   const [, bump] = useState(0);
   useEffect(() => {
@@ -101,5 +86,5 @@ export function useCustomTerms() {
     loadSavedTerms();
     return () => listeners.delete(listener);
   }, []);
-  return { saved, extra, autoDetect };
+  return { saved };
 }

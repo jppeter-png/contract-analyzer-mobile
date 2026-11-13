@@ -10,7 +10,7 @@ import { LOW_OCR_CONFIDENCE, sourceInfo } from '../coverage';
 import { splitSegments, redactionStarts, passageAround } from '../redactionPreview';
 import { scrubText } from '../api';
 import AddTermField from '../components/AddTermField';
-import { getExtraTerms } from '../customTerms';
+import { getListedTerms } from '../detectionChoice';
 import { t, findingLabel, displayFileName } from '../i18n';
 
 const HIDDEN_LABEL = 'Hidden by you'; // what the server calls the items the user asked to hide
@@ -23,9 +23,9 @@ export default function ReviewScreen({ navigation, route }) {
   const [scrubResult, setScrubResult] = useState(initialResult);
   const { scrubbedText, findings = [], wordCount, totalRedacted } = scrubResult;
   const autoDetectOff = scrubResult.autoDetect === false;
-  // Only items typed for this session are worth flagging: a saved name is not expected in every document.
+  // Only items typed for this analysis are worth flagging: a saved name is not expected in every document.
   const notFound = (scrubResult.termMatches || [])
-    .filter(m => m.count === 0 && getExtraTerms().some(e => e.toLowerCase() === m.term.toLowerCase()))
+    .filter(m => m.count === 0 && getListedTerms().some(e => e.toLowerCase() === m.term.toLowerCase()))
     .map(m => m.term);
   const [missedBusy, setMissedBusy] = useState(false);
 

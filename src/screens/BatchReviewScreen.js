@@ -211,7 +211,7 @@ export default function BatchReviewScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity onPress={() => navigation.navigate('Upload')} style={styles.back}>
+        <TouchableOpacity onPress={() => navigation.navigate('Welcome')} style={styles.back}>
           <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
 
@@ -349,7 +349,7 @@ export default function BatchReviewScreen({ navigation, route }) {
             )}
           </>
         ) : (
-          <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('Upload')}>
+          <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('Welcome')}>
             <Text style={styles.newBtnText}>{t('batch.analyzeNew')}</Text>
           </TouchableOpacity>
         )}
