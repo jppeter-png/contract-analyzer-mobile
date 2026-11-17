@@ -6,6 +6,9 @@ import { ACCENT } from '../theme';
 import { t, getLanguage } from '../i18n';
 
 /** The first screen: a greeting, one big way in, and the menu. */
+// The idea behind the app; the same line is on the terms screen and the website.
+const IDEA_BY = 'Chrystal Ding';
+
 export default function WelcomeScreen({ navigation }) {
   const { saved } = useCustomTerms();
   const insets = useSafeAreaInsets();
@@ -48,6 +51,8 @@ export default function WelcomeScreen({ navigation }) {
               <Text style={styles.chevron}>›</Text>
             </TouchableOpacity>
           ))}
+
+          <Text style={styles.credit}>{t('terms.credit', { name: IDEA_BY })}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -62,7 +67,8 @@ const styles = StyleSheet.create({
   greeting: { fontSize: 14, fontWeight: '600', color: ACCENT, marginBottom: 2 },
   title: { fontSize: 27, fontWeight: '700', color: '#111', marginBottom: 8 },
   subtitle: { fontSize: 15, color: '#555', lineHeight: 22 },
-  body: { padding: 24, paddingTop: 20 },
+  body: { flexGrow: 1, padding: 24, paddingTop: 20 },
+  credit: { marginTop: 'auto', paddingTop: 20, fontSize: 8, color: '#aaa', textAlign: 'center' },
   cta: {
     backgroundColor: ACCENT, borderRadius: 16, paddingVertical: 18, alignItems: 'center', marginBottom: 18,
     shadowColor: ACCENT, shadowOpacity: 0.28, shadowRadius: 10, shadowOffset: { width: 0, height: 5 },
